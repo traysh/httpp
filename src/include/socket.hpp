@@ -4,6 +4,7 @@
 
 class Socket
 {
+public:
     Socket();
     virtual ~Socket();
 };
