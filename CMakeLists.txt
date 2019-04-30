@@ -50,7 +50,7 @@ target_link_options(${CMAKE_PROJECT_NAME}.so PRIVATE -fprofile-arcs -ftest-cover
 add_subdirectory (googletest EXCLUDE_FROM_ALL)
 
 # Unit Tests
-add_executable(unit EXCLUDE_FROM_ALL src/test_socket.cpp)
+add_executable(unit EXCLUDE_FROM_ALL src/test_listensocket.cpp)
 
 # Link test executable against gtest & gtest_main
 target_link_libraries(unit ${CMAKE_PROJECT_NAME}.so gtest gtest_main)
@@ -59,8 +59,9 @@ target_compile_options(unit PRIVATE -O0 -g -fprofile-arcs -ftest-coverage)
 target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage)
 
 add_custom_target(test-unit 
+                  COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda' -exec rm {} +
                   COMMAND unit
-                  COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sdp --exclude-directories 'googletest|build'
+                  COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp --exclude-directories 'googletest|build'
                                 --filter ${PROJECT_SOURCE_DIR}/src --exclude '\.\./.*/test_.*'
                   DEPENDS unit)
 
