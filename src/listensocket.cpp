@@ -61,14 +61,14 @@ bool ListenSocket::Listen(const string& address,
     
 	socket_addr.sin_port = htons(port);
 
-    if (::bind(_fd,
-               (struct sockaddr*)&socket_addr,
+    if (::bind(_fd, (struct sockaddr*)&socket_addr,
                sizeof(socket_addr)) != 0) {
-        _ready = false;       
         return false; // TODO
     }
     
-	listen(_fd, max_backlog);
+    if (listen(_fd, max_backlog) != 0) {
+        return false; // TODO
+    }
 
     _ready = true;
     
