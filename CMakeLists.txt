@@ -50,7 +50,8 @@ target_link_options(${CMAKE_PROJECT_NAME}.so PRIVATE -fprofile-arcs -ftest-cover
 add_subdirectory (googletest EXCLUDE_FROM_ALL)
 
 # Unit Tests
-add_executable(unit EXCLUDE_FROM_ALL src/test_listensocket.cpp)
+file(GLOB_RECURSE tests CONFIGURE_DEPENDS "src/test_*.cpp")
+add_executable(unit EXCLUDE_FROM_ALL ${tests})
 
 # Link test executable against gtest & gtest_main
 target_link_libraries(unit ${CMAKE_PROJECT_NAME}.so gtest gtest_main)
