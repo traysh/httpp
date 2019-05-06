@@ -1,4 +1,5 @@
 #include "listensocket.hpp"
+#include "listensocket_mocks.hpp"
 #include "connection.hpp"
 
 #include <string>
@@ -6,7 +7,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <sys/select.h>
 
 using namespace std;
 
@@ -68,16 +68,6 @@ bool ListenSocket::Listen(const char* address,
     return true;
 }
 
-namespace mockable {
-        template<bool Testing = true> int select(
-            int nfds,
-            fd_set* readfds, fd_set* writefds,
-            fd_set* errorfds,
-            struct timeval* timeout) {
-        return ::select(nfds, readfds, writefds, errorfds, timeout);
-    }
-}
-
 Connection* ListenSocket::Accept(const int timeout_ms) {
     fd_set read_fd_set;
     FD_ZERO (&read_fd_set);
@@ -100,11 +90,10 @@ Connection* ListenSocket::Accept(const int timeout_ms) {
 
     memset(&connection_address, 0, sizeof(struct sockaddr));
 
-    int connfd = accept(_fd,
-                        reinterpret_cast<struct sockaddr*>(&connection_address),
-                        &connection_address_size);
+    int connfd = mockable::accept(_fd,
+                                  reinterpret_cast<struct sockaddr*>(&connection_address),
+                                  &connection_address_size);
 
     return new Connection(connfd, connection_address);
 }
 
-// template Connection* ListenSocket::Accept<0>(const int timeout_ms);
