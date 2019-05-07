@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <iostream>
 #include <cstring>
 #include <unistd.h>
 #include <memory>
@@ -7,29 +6,10 @@
 #include "listensocket.hpp"
 #include "listensocket_mocks.hpp"
 #include "connection.hpp"
-#include "mock.hpp"
 
 #include <map>
 
 using namespace std;
-
-namespace mockable {
-template<> int select<true>(
-        int,
-        fd_set* readfds, fd_set*,
-        fd_set*,
-        struct timeval* timeout) {
-
-    sleep(timeout->tv_sec);
-    usleep(timeout->tv_usec);
-    memset(readfds, 0xff, sizeof(fd_set));
-    return 1;
-}
-template<> int accept<true>(int fd, struct sockaddr*, socklen_t*) {
-    return Mockable::Mock<int, int>::Execute(fd);
-    // return fd + 1;
-}
-}
 
 namespace {
 TEST(ListenSocket, CorrectlyInitialized) {
@@ -85,8 +65,18 @@ TEST(ListenSocket, ListenAlreadyBound) {
 }
 
 TEST(ListenSocket, AcceptSuccess) {
-    Mockable::Mock<int, int>::Register(
-        [](int fd){
+    mockable::select.Register(
+        [](int, fd_set* readfds, fd_set*, fd_set*,
+           struct timeval* timeout){
+            sleep(timeout->tv_sec);
+            usleep(timeout->tv_usec);
+            memset(readfds, 0xff, sizeof(fd_set));
+            return 1;
+        }
+    );
+
+    mockable::accept.Register(
+        [](int fd, sockaddr *, unsigned int *){
             return fd + 1;
         }
     );
@@ -104,12 +94,6 @@ TEST(ListenSocket, AcceptSuccess) {
 }
 
 TEST(ListenSocket, AcceptButNoClients) {
-    Mockable::Mock<int, int>::Register(
-        [](int fd){
-            return fd + 1;
-        }
-    );
-
     const auto address = "0.0.0.0";
     const unsigned short port = 9937;
 
@@ -119,9 +103,8 @@ TEST(ListenSocket, AcceptButNoClients) {
     EXPECT_TRUE(socket.Ready());
 
     unique_ptr<Connection>connection(socket.Accept(100));
-    EXPECT_NE(connection, nullptr);
+    EXPECT_EQ(connection, nullptr);
 }
-
 
 } // namespace
 

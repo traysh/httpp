@@ -80,7 +80,6 @@ Connection* ListenSocket::Accept(const int timeout_ms) {
     if (mockable::select (FD_SETSIZE, &read_fd_set, nullptr, nullptr, &timeout) < 0) {
         return nullptr; // TODO exception?
     }
-
     if (!FD_ISSET (_fd, &read_fd_set)) {
         return nullptr;
     }

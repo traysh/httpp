@@ -7,11 +7,10 @@ set (httpp_VERSION_MINOR 1)
 # For use by YouCompleteMe
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fexceptions -Wfatal-errors")
-set(CMAKE_CXX_LINK_FLAGS "-fprofile-arcs -ftest-coverage")
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -38,11 +37,7 @@ list(FILTER sources EXCLUDE REGEX "test_.*")
 list(REMOVE_ITEM sources "${main}")
 
 # add the executables
-add_executable(${CMAKE_PROJECT_NAME} ${main}  ${sources} ${includes})
-add_library(${CMAKE_PROJECT_NAME}.so EXCLUDE_FROM_ALL ${sources} ${includes})
-# generate code coverage data
-target_compile_options(${CMAKE_PROJECT_NAME}.so PRIVATE -O0 -g -fprofile-arcs -ftest-coverage)
-target_link_options(${CMAKE_PROJECT_NAME}.so PRIVATE -fprofile-arcs -ftest-coverage)
+add_executable(${CMAKE_PROJECT_NAME} ${main} ${sources} ${includes})
 
 ################################
 # GTest
@@ -51,12 +46,13 @@ add_subdirectory (googletest EXCLUDE_FROM_ALL)
 
 # Unit Tests
 file(GLOB_RECURSE tests CONFIGURE_DEPENDS "src/test_*.cpp")
-add_executable(unit EXCLUDE_FROM_ALL ${tests})
+add_executable(unit EXCLUDE_FROM_ALL ${tests} ${sources} ${includes})
 
 # Link test executable against gtest & gtest_main
-target_link_libraries(unit ${CMAKE_PROJECT_NAME}.so gtest gtest_main)
+target_link_libraries(unit gtest gtest_main)
+
 # generate code coverage data
-target_compile_options(unit PRIVATE -O0 -g -fprofile-arcs -ftest-coverage)
+target_compile_options(unit PRIVATE -O0 -g -fprofile-arcs -ftest-coverage -DTEST)
 target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage)
 
 add_custom_target(test-unit 
