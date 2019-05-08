@@ -59,7 +59,7 @@ add_custom_target(test-unit
                   COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda' -exec rm {} +
                   COMMAND unit
                   COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp --exclude-directories 'googletest|build'
-                                --filter ${PROJECT_SOURCE_DIR}/src --exclude '\.\./.*/test_.*'
+                                --filter ${PROJECT_SOURCE_DIR}/src --exclude '\.\./.*/test_.*|\.\./.*_prod\..*'
                   DEPENDS unit)
 
 add_custom_target(test DEPENDS test-unit)

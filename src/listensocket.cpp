@@ -59,7 +59,7 @@ bool ListenSocket::Listen(const char* address,
         return false; // TODO
     }
     
-    if (listen(_fd, max_backlog) != 0) {
+    if (mockable::listen(_fd, max_backlog) != 0) {
         return false; // TODO
     }
 

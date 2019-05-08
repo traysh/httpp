@@ -3,15 +3,13 @@
 #include <arpa/inet.h>
 #include "mock.hpp"
 
-#define MOCK(NAMESPACE, FUNC) \
-    extern Mock<decltype(NAMESPACE :: FUNC)> FUNC;
+#define MOCK(ORIGINAL, TARGET) \
+    extern Mock<decltype(ORIGINAL)> TARGET;
 
 namespace mockable {
-
-//extern Mock<decltype(::select)> select;
-//extern Mock<decltype(::accept)> accept;
-MOCK(,select);
-MOCK(,accept);
+MOCK(::select, select);
+MOCK(::accept, accept);
+MOCK(::listen, listen);
 }
 
 

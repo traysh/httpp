@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef TEST
-#include "test_mock.hpp"
+#include "mock_test.hpp"
 #else
-#include "prod_mock.hpp"
+#include "mock_prod.hpp"
 #endif

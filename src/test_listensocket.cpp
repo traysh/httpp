@@ -27,6 +27,22 @@ TEST(ListenSocket, ListenSuccess) {
     EXPECT_TRUE(socket.Ready());
 }
 
+TEST(ListenSocket, ListenFails) {
+    mockable::listen.Register(
+        [](int, int){
+            return 1;
+        }
+    );
+
+    const auto address = "0.0.0.0";
+    const unsigned short port = 9940;
+
+    ListenSocket socket;
+    EXPECT_FALSE(socket.Ready());
+    EXPECT_FALSE(socket.Listen(address, port));
+    EXPECT_FALSE(socket.Ready());
+}
+
 TEST(ListenSocket, ListenTwiceFails) {
     const auto address = "0.0.0.0";
     const unsigned short port = 9934;
@@ -96,6 +112,26 @@ TEST(ListenSocket, AcceptSuccess) {
 TEST(ListenSocket, AcceptButNoClients) {
     const auto address = "0.0.0.0";
     const unsigned short port = 9937;
+
+    ListenSocket socket;
+    EXPECT_FALSE(socket.Ready());
+    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_TRUE(socket.Ready());
+
+    unique_ptr<Connection>connection(socket.Accept(100));
+    EXPECT_EQ(connection, nullptr);
+}
+
+TEST(ListenSocket, AcceptSelectFails) {
+    mockable::select.Register(
+        [](int, fd_set*, fd_set*, fd_set*,
+           struct timeval*){
+            return -1;
+        }
+    );
+
+    const auto address = "0.0.0.0";
+    const unsigned short port = 9938;
 
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
