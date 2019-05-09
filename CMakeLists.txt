@@ -42,7 +42,9 @@ add_executable(${CMAKE_PROJECT_NAME} ${main} ${sources} ${includes})
 ################################
 # GTest
 ################################
+option(BUILD_GMOCK "Builds Google Mock" OFF)
 add_subdirectory (googletest EXCLUDE_FROM_ALL)
+mark_as_advanced(BUILD_GMOCK)
 
 # Unit Tests
 file(GLOB_RECURSE tests CONFIGURE_DEPENDS "src/test_*.cpp")
