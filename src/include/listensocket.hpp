@@ -12,13 +12,14 @@ public:
     virtual ~ListenSocket();
 
     bool Ready() const { return _ready; }
-    bool Listen(const char* address,
+    void Listen(const char* address,
                 const unsigned short& port,
                 const int max_backlog = 10); // FIXME
    Connection* Accept(const int timeout_ms);
+   void SetReuseAddress(bool reuseAddress = true);
 
 private:
-    struct sockaddr_in _addr;
+    struct sockaddr_in _listenAddress;
     int _fd;
     bool _ready = false;
 };

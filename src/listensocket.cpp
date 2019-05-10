@@ -1,4 +1,5 @@
 #include "listensocket.hpp"
+#include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"
 #include "connection.hpp"
 
@@ -8,16 +9,21 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-using namespace std;
+#include <iostream>
 
-ListenSocket::ListenSocket() : _fd(0)
+using namespace std;
+using ErrorType = SocketErrorType;
+
+ListenSocket::ListenSocket() : _fd(socket(AF_INET, SOCK_STREAM, 0))
 {
-	memset(&_addr, 0, sizeof(_addr));
+	memset(&_listenAddress, 0, sizeof(_listenAddress));
 }
 
 ListenSocket::~ListenSocket()
 {
-    // TODO close socket
+    if (close(_fd) != 0) {
+        std::cerr << "Error closing socket" << std::endl;
+    }
 }
 
 // TODO move to config?
@@ -25,52 +31,57 @@ namespace {
     constexpr int address_length = 16; // FIXME: not valid for ipv6
 }
 
+void ListenSocket::SetReuseAddress(bool reuseAddress) {
+    if (_ready) {
+        throw SocketError<ErrorType::AlreadyInitialized>();
+    }
 
-bool ListenSocket::Listen(const char* address,
+    int enable = reuseAddress ? 1 : 0;
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        throw SocketError<ErrorType::SetReuseAddressError>();
+    }
+
+void ListenSocket::Listen(const char* address,
                           const unsigned short& port,
                           const int max_backlog)
 {
     if (_ready) {
-        // TODO exception
-        return false;
+        throw SocketError<ErrorType::AlreadyInitialized>();
     }
 
     char sane_address[address_length];
     sane_address[address_length -1] = 0;
     memcpy(sane_address, address, 15); // xxx.xxx.xxx.xxx
 
-	_fd = socket(AF_INET, SOCK_STREAM, 0);
-
     struct in_addr addr;
-    if (inet_aton(sane_address, &addr) == 0) {
-        // TODO exception
-        return false;
+    if (int ret = inet_aton(sane_address, &addr) == 0) {
+        throw SocketError<ErrorType::ConvertAddress>(ret);
     }
 
-    struct sockaddr_in socket_addr;
-	socket_addr.sin_family = AF_INET;
-    socket_addr.sin_addr = addr;
-        
-    
-	socket_addr.sin_port = htons(port);
+	_listenAddress.sin_family = AF_INET;
+    _listenAddress.sin_addr = addr;
+	_listenAddress.sin_port = htons(port);
 
-    if (::bind(_fd, (struct sockaddr*)&socket_addr,
-               sizeof(socket_addr)) != 0) {
-        return false; // TODO
+    if (int ret = ::bind(_fd, (struct sockaddr*)&_listenAddress,
+               sizeof(_listenAddress)) != 0) {
+        throw SocketError<ErrorType::BindError>(ret);
     }
     
-    if (mockable::listen(_fd, max_backlog) != 0) {
-        return false; // TODO
+    if (int ret = mockable::listen(_fd, max_backlog) != 0) {
+        throw SocketError<ErrorType::ListenError>(ret);
     }
 
     _ready = true;
-    
-    return true;
 }
 
 Connection* ListenSocket::Accept(const int timeout_ms) {
+    if (!_ready) {
+        throw SocketError<ErrorType::Unready>();
+    }
+
     fd_set read_fd_set;
-    FD_ZERO (&read_fd_set);
+    FD_ZERO(&read_fd_set);
+    FD_SET(_fd, &read_fd_set);
 
     struct timeval timeout = {
         timeout_ms / 1000, // .tv_sec
@@ -78,7 +89,7 @@ Connection* ListenSocket::Accept(const int timeout_ms) {
     };
 
     if (mockable::select (FD_SETSIZE, &read_fd_set, nullptr, nullptr, &timeout) < 0) {
-        return nullptr; // TODO exception?
+        throw SocketError<ErrorType::SelectError>();
     }
     if (!FD_ISSET (_fd, &read_fd_set)) {
         return nullptr;

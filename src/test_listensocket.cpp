@@ -4,12 +4,17 @@
 #include <memory>
 
 #include "listensocket.hpp"
+#include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"
 #include "connection.hpp"
 
 #include <map>
 
 using namespace std;
+using ErrorType = SocketErrorType;
+
+const auto sourceAddress = "0.0.0.0";
+const unsigned short port = 9933;
 
 namespace {
 TEST(ListenSocket, CorrectlyInitialized) {
@@ -18,12 +23,25 @@ TEST(ListenSocket, CorrectlyInitialized) {
 }
 
 TEST(ListenSocket, ListenSuccess) {
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9933;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port+1));
+    EXPECT_TRUE(socket.Ready());
+}
+
+TEST(ListenSocket, SetReuseAddressFailAlreadyInitialized) {
+    ListenSocket socket;
+    EXPECT_FALSE(socket.Ready());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port+2));
+    EXPECT_THROW(socket.SetReuseAddress(), SocketError<ErrorType::AlreadyInitialized>);
+}
+
+TEST(ListenSocket, SetReuseAddressSuccess) {
+    ListenSocket socket;
+    EXPECT_FALSE(socket.Ready());
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
+    EXPECT_TRUE(socket.Ready());
     EXPECT_TRUE(socket.Ready());
 }
 
@@ -34,49 +52,48 @@ TEST(ListenSocket, ListenFails) {
         }
     );
 
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9940;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_FALSE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_THROW(socket.Listen(sourceAddress, port),
+        SocketError<ErrorType::ListenError>);
     EXPECT_FALSE(socket.Ready());
 }
 
 TEST(ListenSocket, ListenTwiceFails) {
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9934;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    EXPECT_FALSE(socket.Listen(address, port));
+    EXPECT_THROW(socket.Listen(sourceAddress, port),
+                 SocketError<ErrorType::AlreadyInitialized>);
     EXPECT_TRUE(socket.Ready());
 }
 
 TEST(ListenSocket, ListenInvalidAddress) {
-    const auto address = "notaddress";
-    const unsigned short port = 9933;
+    const auto sourceAddress = "notaddress";
 
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_FALSE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_THROW(socket.Listen(sourceAddress, port),
+                 SocketError<ErrorType::ConvertAddress>);
     EXPECT_FALSE(socket.Ready());
 }
 
 TEST(ListenSocket, ListenAlreadyBound) {
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9935;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
     ListenSocket failureSocket;
-    EXPECT_FALSE(failureSocket.Listen(address, port));
+    failureSocket.SetReuseAddress();
+    EXPECT_THROW(failureSocket.Listen(sourceAddress, port),
+                 SocketError<ErrorType::BindError>);
     EXPECT_FALSE(failureSocket.Ready());
 }
 
@@ -97,12 +114,10 @@ TEST(ListenSocket, AcceptSuccess) {
         }
     );
 
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9936;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
     unique_ptr<Connection>connection(socket.Accept(100));
@@ -110,12 +125,10 @@ TEST(ListenSocket, AcceptSuccess) {
 }
 
 TEST(ListenSocket, AcceptButNoClients) {
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9937;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
     unique_ptr<Connection>connection(socket.Accept(100));
@@ -130,16 +143,14 @@ TEST(ListenSocket, AcceptSelectFails) {
         }
     );
 
-    const auto address = "0.0.0.0";
-    const unsigned short port = 9938;
-
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
-    EXPECT_TRUE(socket.Listen(address, port));
+    EXPECT_NO_THROW(socket.SetReuseAddress());
+    EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    unique_ptr<Connection>connection(socket.Accept(100));
-    EXPECT_EQ(connection, nullptr);
+    EXPECT_THROW(socket.Accept(100),
+        SocketError<ErrorType::SelectError>);
 }
 
 } // namespace
