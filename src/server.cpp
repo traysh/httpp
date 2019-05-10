@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <functional>
+#include <future>
 
 Server::Server() {
 }
@@ -31,15 +32,16 @@ void Server::Serve(const char* address,
 
     _run = true;
     while(_run) {
-        auto* connection = _socket.Accept(10); // TODO
+        auto* connection = _socket.Accept(10); // FIXME hardcoded
         if (connection == nullptr) {
             continue;
         }
 
         auto request = connection->ReadData();
-        _run = false;
 
         // TODO router
-        std::cout << request->data()<< std::endl;
+        auto result = std::async(std::launch::async, [&]() {
+            std::cout << request->data()<< std::endl;
+        });
     }
 }
