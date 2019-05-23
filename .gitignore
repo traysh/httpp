@@ -1,5 +1,4 @@
 build
 *.swp
 *.swo
-*.in
 Makefile
