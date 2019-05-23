@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "connection.hpp"
 
+#include <string.h>
 #include <sstream>
 #include <iostream>
 #include <functional>

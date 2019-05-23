@@ -1,5 +1,6 @@
 #include "connection.hpp"
 
+#include <string.h>
 #include <vector>
 #include <sys/types.h>
 #include <sys/uio.h>
