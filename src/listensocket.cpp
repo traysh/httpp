@@ -4,7 +4,6 @@
 #include "connection.hpp"
 
 #include <string.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/time.h>

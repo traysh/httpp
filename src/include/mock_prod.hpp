@@ -4,21 +4,19 @@
 #include <cstdlib>
 
 namespace mockable {
-template <typename F> class Mock;
-
-template <typename R, typename ...Args>
-class Mock<R(Args...)> {
-    typedef R (*original_t)(Args...);
+template <typename F>
+class Mock {
 public:
-    Mock(original_t func) {
+    Mock(F func) {
         _original = func;
     }
 
-    inline constexpr R operator()(Args... args) {
+    template<typename ...Args>
+    inline auto operator()(Args... args) noexcept(noexcept(_original(args...))) {
         return _original(std::forward<Args>(args)...);
     }
 
 private:
-    original_t _original;
+    F* _original;
 };
 }

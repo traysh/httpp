@@ -46,11 +46,9 @@ TEST(ListenSocket, SetReuseAddressSuccess) {
 }
 
 TEST(ListenSocket, ListenFails) {
-    mockable::listen.Register(
-        [](int, int){
-            return 1;
-        }
-    );
+    mockable::listen.Register([](int fd, int backlog) noexcept(noexcept(::listen(fd, backlog))) {
+        return 1;
+    });
 
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());

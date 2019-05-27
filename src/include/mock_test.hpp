@@ -9,23 +9,20 @@
 
 namespace mockable {
 
-
-template <typename F> class Mock;
-
 // TODO support multiple registers
-template <typename R, typename ...Args>
-class Mock<R(Args...)> {
-    typedef R (*original_t)(Args...);
+template <typename F>
+class Mock {
 public:
-    Mock(original_t func) {
+    Mock(F func) {
         _original = func;
     }
 
-    void Register(original_t func) {
+    void Register(F func) {
         _expectations.emplace(getTestKey(), func);
     }
 
-    R operator()(Args... args) {
+    template<typename ...Args>
+    auto operator()(Args... args) noexcept(noexcept(_original(args...))) {
         const auto func = _expectations.find(getTestKey());
         if (func == _expectations.end()) {
             return _original(std::forward<Args>(args)...);
@@ -34,8 +31,8 @@ public:
     }
 
 private:
-    std::map<std::string, original_t> _expectations;
-    original_t _original;
+    std::map<std::string, F*> _expectations;
+    F* _original;
 
     static inline std::string getTestKey() {
         const auto* test_info = ::testing::UnitTest::GetInstance()->current_test_info();

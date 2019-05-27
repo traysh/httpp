@@ -4,13 +4,15 @@ project (httpp)
 set (httpp_VERSION_MAJOR 0)
 set (httpp_VERSION_MINOR 1)
 
-# For use by YouCompleteMe
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fexceptions -Wfatal-errors")
+
+find_package (Threads)
+
+# For use by YouCompleteMe
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -38,6 +40,7 @@ list(REMOVE_ITEM sources "${main}")
 
 # add the executables
 add_executable(${CMAKE_PROJECT_NAME} ${main} ${sources} ${includes})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 ################################
 # GTest
