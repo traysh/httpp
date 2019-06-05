@@ -1,7 +1,7 @@
-#include "listensocket.hpp"
+#include <list>
 
-#include <set>
-#include <map>
+#include "listensocket.hpp"
+#include "connectionqueue.hpp"
 
 class Server {
 public:
@@ -16,8 +16,10 @@ public:
 private:
     void showStartupInfo(const char* address,
                          const unsigned short& port);
+    void handleRequests();
 
     ListenSocket _socket;
 
-    bool _run;
+    bool _run = true;
+    ConnectionQueue _queue;
 };

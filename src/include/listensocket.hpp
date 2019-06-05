@@ -2,7 +2,7 @@
 
 #include <netinet/in.h>
 
-class Connection;
+#include "connection.hpp"
 
 class ListenSocket
 {
@@ -14,8 +14,8 @@ public:
     void Listen(const char* address,
                 const unsigned short& port,
                 const int max_backlog = 10); // FIXME
-   Connection* Accept(const int timeout_ms);
-   void SetReuseAddress(bool reuseAddress = true);
+    Connection::Ptr Accept(const int timeout_ms);
+    void SetReuseAddress(bool reuseAddress = true);
 
 private:
     struct sockaddr_in _listenAddress;

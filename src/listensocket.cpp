@@ -73,7 +73,7 @@ void ListenSocket::Listen(const char* address,
     _ready = true;
 }
 
-Connection* ListenSocket::Accept(const int timeout_ms) {
+Connection::Ptr ListenSocket::Accept(const int timeout_ms) {
     if (!_ready) {
         throw SocketError<ErrorType::Unready>();
     }
@@ -91,7 +91,7 @@ Connection* ListenSocket::Accept(const int timeout_ms) {
         throw SocketError<ErrorType::SelectError>();
     }
     if (!FD_ISSET (_fd, &read_fd_set)) {
-        return nullptr;
+        return std::unique_ptr<Connection>(nullptr);
     }
 
     struct sockaddr_in connection_address;
@@ -103,6 +103,7 @@ Connection* ListenSocket::Accept(const int timeout_ms) {
                                   reinterpret_cast<struct sockaddr*>(&connection_address),
                                   &connection_address_size);
 
-    return new Connection(connfd, connection_address);
+    return std::unique_ptr<Connection>(
+            new Connection(connfd, connection_address));
 }
 

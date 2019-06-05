@@ -6,6 +6,8 @@
 #include <iostream>
 #include <functional>
 #include <future>
+#include <chrono>
+#include <thread>
 
 Server::Server() {
 }
@@ -31,18 +33,35 @@ void Server::Serve(const char* address,
     showStartupInfo(address, port);
     _socket.Listen(address, port);
 
-    _run = true;
-    while(_run) {
-        auto* connection = _socket.Accept(10); // FIXME hardcoded
+    auto handlerThread = std::async(std::launch::async, [&]() {
+        this->handleRequests();
+    });
+
+    while (_run) {
+        auto connection = _socket.Accept(10); // FIXME hardcoded
         if (connection == nullptr) {
             continue;
         }
 
-        auto request = connection->ReadData();
+        _queue.PushBack(connection);
+    }
+}
 
+void Server::handleRequests() {
+    while (_run) {
+        if (_queue.Empty()) {
+            using namespace std;
+            this_thread::sleep_for(chrono::milliseconds(50));
+            continue;
+        }
+
+        auto connection = _queue.PopFront();
+
+        char buffer[1024]; // FIXME
         // TODO router
         auto result = std::async(std::launch::async, [&]() {
-            std::cout << request->data()<< std::endl;
+            *connection << "olá\n";
+            std::cout << connection->ReadData(buffer, sizeof(buffer)) << std::endl;
         });
     }
 }

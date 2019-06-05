@@ -23,11 +23,17 @@ public:
 
     template<typename ...Args>
     auto operator()(Args... args) noexcept(noexcept(_original(args...))) {
-        const auto func = _expectations.find(getTestKey());
-        if (func == _expectations.end()) {
-            return _original(std::forward<Args>(args)...);
+        auto func = _expectations.find(getTestKey());
+        if (func != _expectations.end()) {
+            return _expectations[getTestKey()](std::forward<Args>(args)...);
         }
-        return _expectations[getTestKey()](std::forward<Args>(args)...);
+
+        func = _expectations.find("*");
+        if (func != _expectations.end()) {
+            return _expectations["*"](std::forward<Args>(args)...);
+        }
+
+        return _original(std::forward<Args>(args)...);
     }
 
 private:
@@ -36,6 +42,9 @@ private:
 
     static inline std::string getTestKey() {
         const auto* test_info = ::testing::UnitTest::GetInstance()->current_test_info();
+        if (!test_info) {
+            return "*";
+        }
             
         std::stringstream ss;
         ss << std::string(test_info->test_case_name())

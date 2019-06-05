@@ -31,8 +31,8 @@ list(REMOVE_DUPLICATES include_dirs)
 
 include_directories("${PROJECT_BINARY_DIR}" "${include_dirs}")
 
-# Whenever this glob's value changes, cmake will rerun and update the build with the
-# new/removed files.
+# Whenever this glob's value changes, cmake will rerun and update the build with
+# the new/removed files.
 set (main "${PROJECT_SOURCE_DIR}/src/${CMAKE_PROJECT_NAME}.cpp")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp")
 list(FILTER sources EXCLUDE REGEX "test_.*")
@@ -54,17 +54,36 @@ file(GLOB_RECURSE tests CONFIGURE_DEPENDS "src/test_*.cpp")
 add_executable(unit EXCLUDE_FROM_ALL ${tests} ${sources} ${includes})
 
 # Link test executable against gtest & gtest_main
-target_link_libraries(unit gtest gtest_main)
+target_link_libraries(unit gtest)
 
 # generate code coverage data
-target_compile_options(unit PRIVATE -O0 -g -fprofile-arcs -ftest-coverage -DTEST)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # using llvm
+    set(GCOV_BIN "llvm-cov gcov")
+else ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # using GCC
+    set(GCOV_BIN "gcov")
+endif()
+
+target_compile_options(unit PRIVATE -Og -ggdb -g3 -fprofile-arcs -ftest-coverage
+                       -DTEST -DPROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage)
 
 add_custom_target(test-unit 
-                  COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda' -exec rm {} +
+                  COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'
+                                                     -exec rm {} +
                   COMMAND unit
-                  COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp --exclude-directories 'googletest|build'
-                                --filter ${PROJECT_SOURCE_DIR}/src --exclude '\.\./.*/test_.*|\.\./.*_prod\..*'
+                  COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp
+                                --gcov-executable "${GCOV_BIN}"
+                                --exclude-directories 'googletest|build'
+                                --filter ${PROJECT_SOURCE_DIR}/src
+                                --exclude '\.\./.*/test_.*|\.\./.*_prod\..*'
                   DEPENDS unit)
+add_custom_target(test-debug
+                  COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'
+                                                     -exec rm {} +
+                  COMMAND lldb ./unit
+                  DEPENDS unit)
+
 
 add_custom_target(test DEPENDS test-unit)

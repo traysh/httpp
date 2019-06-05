@@ -2,6 +2,8 @@
 
 #include <sys/select.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+
 #include "mock.hpp"
 
 #define MOCK(ORIGINAL, TARGET) \
@@ -11,6 +13,7 @@ namespace mockable {
 MOCK(::select, select);
 MOCK(::accept, accept);
 MOCK(::listen, listen);
+MOCK(::close, close);
 }
 
 

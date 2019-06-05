@@ -1,30 +1,32 @@
 #include "connection.hpp"
+#include "listensocket_mocks.hpp"
 
 #include <string.h>
-#include <vector>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <iostream>
 
 Connection::Connection(const int fd, const sockaddr_in& address)
     : _fd(fd), _address(address)
 {
 }
 
-Connection::Data* Connection::ReadData() {
-    char buffer[BufferSize];
-    int bytesCount;
+Connection::~Connection() {
+     if (mockable::close(_fd) != 0) {
+        std::cerr << "Error closing socket" << std::endl;
+    }
+}
 
-    memset(buffer, 0, BufferSize);
-
-    bytesCount = ::read(_fd, buffer, BufferSize);
-
+size_t Connection::ReadData(char* buffer, size_t size) {
+    int bytesCount = ::read(_fd, buffer, size);
     if (bytesCount < 0) { // Read error
-        return nullptr; // TODO exception
+        return 0; // TODO exception
     }
 
-    if (bytesCount == 0) // EOF
-        return nullptr;
+    return bytesCount;
+}
 
-    return new Data(buffer, buffer + bytesCount);
+void Connection::operator<<(const std::string& text) {
+    write(_fd, text.data(), text.size());
 }

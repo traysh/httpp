@@ -112,13 +112,15 @@ TEST(ListenSocket, AcceptSuccess) {
         }
     );
 
+    mockable::close.Register([](int){ return 0; });
+
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    unique_ptr<Connection>connection(socket.Accept(100));
+    Connection::Ptr connection(socket.Accept(100));
     EXPECT_NE(connection, nullptr);
 }
 
@@ -129,7 +131,7 @@ TEST(ListenSocket, AcceptButNoClients) {
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    unique_ptr<Connection>connection(socket.Accept(100));
+    Connection::Ptr connection(socket.Accept(100));
     EXPECT_EQ(connection, nullptr);
 }
 
