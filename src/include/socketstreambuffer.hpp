@@ -8,7 +8,6 @@
 #include <map>
 
 #include "connection.hpp"
-#include "zerocopybuffer.hpp"
 
 // TODO rename to SocketStreamBuffer
 template<class T = Connection::Ptr>
