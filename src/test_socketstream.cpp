@@ -7,32 +7,10 @@
 
 #include "socketstreambuffer.hpp"
 #include "connection.hpp"
+#include "connection_mock.hpp"
 
-const size_t buffer_size = SocketStreamBuffer<Connection>::BufferSize;
-
-template <int N = buffer_size>
-struct ConnectionMock {
-    const static size_t BufferSize = N;
-
-    ConnectionMock(const std::vector<const char*> requests)
-        : _requests(requests) {}
-
-    size_t ReadData(char* buffer, size_t size) {
-        if (_request_count == _requests.size()) {
-            return 0; // TODO exception
-        }
-
-        const char* request = _requests[_request_count++];
-        size_t read_size = std::min(strnlen(request, BufferSize), size);
-        memcpy(buffer, request, read_size);
-        return read_size;
-    }
-
-private:
-    const std::vector<const char*> _requests;
-    size_t _request_count = 0;
-};
-
+constexpr size_t buffer_size = SocketStreamBuffer<Connection>::BufferSize;
+using ConnectionMock = Mock::Connection<buffer_size>;
 using SocketStreamTest = ::testing::Test;
 
 TEST_F(SocketStreamTest, ReadLineReadilyAvailable) {
@@ -87,7 +65,7 @@ TEST_F(SocketStreamTest, ReadFullLineInParts) {
     memset(readBuffer, 0, sizeof(readBuffer));
 
     char const (*buffer)[read_buffer_size] = reinterpret_cast<decltype(buffer)>(&data);
-    ConnectionMock<read_buffer_size> connection({
+    Mock::Connection<read_buffer_size> connection({
             buffer[0], buffer[1], buffer[2], buffer[3], buffer[4] });
     SocketStreamBuffer sbuf(connection);
     std::istream stream(&sbuf);

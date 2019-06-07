@@ -1,22 +1,25 @@
 #pragma once
 
-#include <sstream>
-#include <map>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
+#include <map>
+#include <memory>
 #include <stdexcept>
+#include <string>
 
 #include "httprequest.hpp"
 #include "connection.hpp"
+#include "socketstreambuffer.hpp"
 #include "string_util.hpp"
 
-struct RequestParser {
-    template<class T = Connection::Ptr>
-    static HTTPRequest parse(const T& connection) {
-        auto rawData = connection->ReadData();
-        std::stringstream dataStream(std::string(rawData.data(),
-                                                 rawData.size()));
-        rawData.clear();
+template<class T = Connection>
+class RequestParser {
+public:
+    RequestParser(T& connection) : _buffer(connection) {}
+
+    HTTPRequest parse() {
+        std::iostream dataStream(&_buffer);
 
         HTTPRequest request;
 
@@ -28,14 +31,14 @@ struct RequestParser {
     }
 
 private:
-    static inline void parseRequestLine(std::stringstream& stream, HTTPRequest& request) {
-        std::string line;
+    SocketStreamBuffer<T> _buffer;
 
-        getCleanLine(stream, line);
-        std::stringstream lineStream(line);
 
-        std::string method, path, protocol, protocolVersion;
-        lineStream >> method >> path >> protocol;
+    inline void parseRequestLine(std::iostream& stream, HTTPRequest& request) {
+        std::string method, path, protocol, protocolVersion, rest;
+        stream >> method >> path >> protocol;
+        getline(stream, rest);
+
         const auto protocolData = Util::String::Split(protocol, '/');
         protocol = protocolData.first;
         protocolVersion = protocolData.second;
@@ -46,31 +49,57 @@ private:
         request.ProtocolVersion = protocolVersion;
     }
 
-    static inline void parseHeaders(std::stringstream& stream,
-                                    HTTPRequest& request) {
-        std::stringstream lineStream;
-        std::string line;
+    inline void parseHeaders(std::iostream& stream, HTTPRequest& request) {
+        int next_char;
 
-        for (getCleanLine(stream, line); 
-                line.size() != 0 && stream.good();
-                getCleanLine(stream, line)) {
+        for (next_char = stream.get();
+             next_char != '\r' && stream.peek() != '\n' && next_char != '\n' && stream.good();
+             next_char = stream.get()) {
+            std::stringstream key, value;
+            std::string rest;
 
-            using namespace Util::String;
-            auto header = Split(line, ':');
-            auto key = Trim(ToUpper(header.first));
-            auto value = Trim(header.second);
-            request.Header.insert_or_assign(key, value);
+            for (;
+                 next_char != '\n' && next_char != ':' && stream.good();
+                 next_char = stream.get()) {
+                
+                key << static_cast<char>(::toupper(next_char));
+            }
+
+            if (next_char != ':') {
+                // TODO error
+            }
+
+            for (next_char = stream.get();
+                 std::isblank(next_char);
+                 next_char = stream.get()) {}
+
+            for (;
+                 stream.good();
+                 next_char = stream.get()) {
+
+                if (next_char == '\r' && stream.peek() == '\n') {
+                    break;
+                }
+
+                value << static_cast<char>(next_char);
+            }
+
+            request.Header.insert_or_assign(key.str(), value.str());
+            getline(stream, rest);
         }
     }
 
-    static inline void parseBody(std::stringstream& stream,
+    inline void parseBody(std::iostream& stream,
                                  HTTPRequest& request) {
         // FIXME check content-length
-        stream << 0;
-        request.Body = &stream.str()[stream.tellg()];
+        stream << '\0';
+
+        std::stringbuf rest;
+        stream >> &rest;
+        request.Body = rest.str();
     }
 
-    static HTTPRequest::MethodType mapMethod(const std::string& str) {
+    HTTPRequest::MethodType mapMethod(const std::string& str) {
         const static std::map<std::string, HTTPRequest::MethodType> m {
             { "GET", HTTPRequest::MethodType::Get },
             { "HEAD", HTTPRequest::MethodType::Head },
@@ -94,7 +123,7 @@ private:
 		return type;
     }
 
-    static HTTPRequest::ProtocolType mapProtocol(const std::string& str) {
+    HTTPRequest::ProtocolType mapProtocol(const std::string& str) {
         const static std::map<std::string, HTTPRequest::ProtocolType> m {
             { "HTTP", HTTPRequest::ProtocolType::HTTP },
         };
@@ -108,10 +137,5 @@ private:
         }
 
 		return type;
-    }
-
-    static void getCleanLine(std::stringstream& ss, std::string& line) {
-        std::getline(ss, line);
-        line = Util::String::RemoveAll(line, '\r');
     }
 };

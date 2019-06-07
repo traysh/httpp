@@ -65,9 +65,9 @@ else ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(GCOV_BIN "gcov")
 endif()
 
-target_compile_options(unit PRIVATE -Og -ggdb -g3 -fprofile-arcs -ftest-coverage
+target_compile_options(unit PRIVATE -Og -ggdb -g3 -fprofile-arcs -ftest-coverage -fstandalone-debug
                        -DTEST -DPROJECT_ROOT="${PROJECT_SOURCE_DIR}")
-target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage)
+target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage -fstandalone-debug)
 
 add_custom_target(test-unit 
                   COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'

@@ -1,28 +1,15 @@
 #include <gtest/gtest.h>
 
 #include "requestparser.hpp"
+#include "connection_mock.hpp"
 
-struct ConnectionMock {
-    using Data = std::vector<char>;
-
-    ConnectionMock(const std::vector<const char*>& requests)
-        : _requests(requests) {}
-
-    Data ReadData() {
-        const char* request = _requests[_request_count++];
-        return std::vector<char>(request,
-                                 request + strlen(request));
-    }
-
-private:
-    const std::vector<const char*> _requests;
-    size_t _request_count = 0;
-};
+using RequestParserTest = ::testing::Test;
 
 namespace {
-TEST(RequestParser, WellFormattedRequestLine) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    auto request = RequestParser::parse<ConnectionMock*>(&connection);
+TEST_F(RequestParserTest, WellFormattedRequestLine) {
+    Mock::Connection connection({"GET / HTTP/1.1\r\n\r\n"});
+    RequestParser parser(connection);
+    auto request = parser.parse();
 
     EXPECT_EQ(request.Method, HTTPRequest::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
@@ -30,14 +17,15 @@ TEST(RequestParser, WellFormattedRequestLine) {
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 }
 
-TEST(RequestParser, WellFormattedRequestHeader) {
-    ConnectionMock connection({
+TEST_F(RequestParserTest, WellFormattedRequestHeader) {
+    Mock::Connection connection({
             "GET / HTTP/1.1\r\n"
             "Host: localhost:9933\r\n"
             "User-Agent: curl/7.54.0\r\n"
             "Accept: */*\r\n\r\n"
     });
-    auto request = RequestParser::parse<ConnectionMock*>(&connection);
+    RequestParser parser(connection);
+    auto request = parser.parse();
 
     // Status line
     EXPECT_EQ(request.Method, HTTPRequest::MethodType::Get);
@@ -46,27 +34,27 @@ TEST(RequestParser, WellFormattedRequestHeader) {
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
-    ASSERT_NE(request.Header.find("HOST"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("HOST") == request.Header.end());
     EXPECT_EQ(request.Header.at("HOST"), "localhost:9933");
-    ASSERT_NE(request.Header.find("USER-AGENT"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("USER-AGENT") == request.Header.end());
     EXPECT_EQ(request.Header.at("USER-AGENT"), "curl/7.54.0");
-    ASSERT_NE(request.Header.find("ACCEPT"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("ACCEPT") == request.Header.end());
     EXPECT_EQ(request.Header.at("ACCEPT"), "*/*");
     EXPECT_EQ(request.Header.size(), 3);
 }
 
-TEST(RequestParser, WellFormattedPost) {
-    ConnectionMock connection({
-            "POST / HTTP/1.1\r\n"
-            "Host: localhost:9933\r\n"
-            "User-Agent: curl/7.54.0\r\n"
-            "Accept: */*\r\n"
-            "Content-Type: application/json\r\n"
-            "Content-Length: 13\r\n\r\n"
-            "{\"foo\":\"bar\"}"
-    });
-    auto request = RequestParser::parse<ConnectionMock*>(&connection);
-
+TEST_F(RequestParserTest, WellFormattedPost) {
+    Mock::Connection connection({
+        "POST / HTTP/1.1\r\n"
+        "Host: localhost:9933\r\n"
+        "User-Agent: curl/7.54.0\r\n"
+        "Accept: */*\r\n"
+        "Content-Type: application/json\r\n"
+        "Content-Length: 13\r\n\r\n"
+        "{\"foo\":\"bar\"}"
+     });
+    RequestParser parser(connection);
+    auto request = parser.parse();
     // Status line
     EXPECT_EQ(request.Method, HTTPRequest::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
@@ -74,11 +62,11 @@ TEST(RequestParser, WellFormattedPost) {
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
-    ASSERT_NE(request.Header.find("HOST"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("HOST") == request.Header.end());
     EXPECT_EQ(request.Header.at("HOST"), "localhost:9933");
-    ASSERT_NE(request.Header.find("USER-AGENT"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("USER-AGENT") == request.Header.end());
     EXPECT_EQ(request.Header.at("USER-AGENT"), "curl/7.54.0");
-    ASSERT_NE(request.Header.find("ACCEPT"), request.Header.end());
+    ASSERT_FALSE(request.Header.find("ACCEPT") == request.Header.end());
     EXPECT_EQ(request.Header.at("ACCEPT"), "*/*");
     EXPECT_EQ(request.Header.size(), 5);
 

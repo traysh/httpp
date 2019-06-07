@@ -1,8 +1,12 @@
 #include "server.hpp"
+
 #include "connection.hpp"
+#include "socketstreambuffer.hpp"
+#include "requestparser.hpp"
+#include "httprequest.hpp"
 
 #include <string.h>
-#include <sstream>
+#include <istream>
 #include <iostream>
 #include <functional>
 #include <future>
@@ -56,12 +60,17 @@ void Server::handleRequests() {
         }
 
         auto connection = _queue.PopFront();
+        // auto request = RequestParser::parse(connection);
 
-        char buffer[1024]; // FIXME
+        SocketStreamBuffer buffer(*connection);
+        std::istream stream(&buffer);
+
         // TODO router
         auto result = std::async(std::launch::async, [&]() {
             *connection << "olá\n";
-            std::cout << connection->ReadData(buffer, sizeof(buffer)) << std::endl;
+            std::string s;
+            stream >> s;
+            std::cout << s << std::endl;
         });
     }
 }

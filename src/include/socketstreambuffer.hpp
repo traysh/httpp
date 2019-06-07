@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <sstream>
 #include <istream>
 #include <memory>
@@ -9,14 +10,13 @@
 
 #include "connection.hpp"
 
-// TODO rename to SocketStreamBuffer
-template<class T = Connection::Ptr>
+template<class T = Connection>
 class SocketStreamBuffer : public std::streambuf {
 public:
     const static size_t BufferSize = 1024; // FIXME
 
     SocketStreamBuffer(T& connection)
-        : std::streambuf(), _connection(std::move(connection)) {}
+        : std::streambuf(), _connection(connection) {}
 
 
 protected:
@@ -159,7 +159,7 @@ protected:
             }
 
             const size_t read_size = showmanyc() < n ? showmanyc() : n;
-            memcpy(&s[lineSize], buffer, read_size);
+            ::memcpy(&s[lineSize], buffer, read_size);
             lineSize += read_size;
             n -= read_size;
         }
@@ -167,7 +167,7 @@ protected:
     }
 
 private:
-    T _connection;
+    T& _connection;
     std::vector<char*> _buffer;
     std::map<char*, size_t> _addressToBuffer;
     char* _validLimit = nullptr;
