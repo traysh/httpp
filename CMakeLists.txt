@@ -33,14 +33,28 @@ include_directories("${PROJECT_BINARY_DIR}" "${include_dirs}")
 
 # Whenever this glob's value changes, cmake will rerun and update the build with
 # the new/removed files.
-set (main "${PROJECT_SOURCE_DIR}/src/${CMAKE_PROJECT_NAME}.cpp")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp")
 list(FILTER sources EXCLUDE REGEX "test_.*")
-list(REMOVE_ITEM sources "${main}")
 
-# add the executables
-add_executable(${CMAKE_PROJECT_NAME} ${main} ${sources} ${includes})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+# add the libraries
+add_library("${CMAKE_PROJECT_NAME}_STATIC" ${sources} ${includes})
+set_target_properties("${CMAKE_PROJECT_NAME}_STATIC" PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
+target_link_libraries("${CMAKE_PROJECT_NAME}_STATIC" ${CMAKE_THREAD_LIBS_INIT})
+
+add_library("${CMAKE_PROJECT_NAME}_SHARED" SHARED ${sources} ${includes})
+set_target_properties("${CMAKE_PROJECT_NAME}_SHARED" PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
+target_link_libraries("${CMAKE_PROJECT_NAME}_SHARED" ${CMAKE_THREAD_LIBS_INIT})
+
+################################
+# Examples
+################################
+file(GLOB_RECURSE examples CONFIGURE_DEPENDS "examples/*/*.cpp")
+
+add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE" EXCLUDE_FROM_ALL ${examples} ${includes})
+set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE" PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
+target_link_libraries("${CMAKE_PROJECT_NAME}_EXAMPLE" "${CMAKE_PROJECT_NAME}_SHARED")
+
+add_custom_target(examples DEPENDS ${CMAKE_PROJECT_NAME}_EXAMPLE)
 
 ################################
 # GTest
