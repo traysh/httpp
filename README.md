@@ -29,11 +29,15 @@ export CXX=clang++
 
 ## Install prerequisites on Mac
 
-First, install homebrew package manager: https://brew.sh/#install
+First, install a compiler: *Xcode* or *Command Line Tools*
 
-Then use it to install the other requirements: `brew install llvm cmake gcovr`
+Then, install homebrew package manager: https://brew.sh/#install
 
-You can also use Xcode LLVM compiler instead. But CMake and gcovr aren't installed by Xcode.
+Then use it to install the other requirements: `brew install cmake gcovr`
+
+You can also use homebrew's LLVM compiler instead, but will need to adjust
+CC and CXX environment variables to point to clang and clang++ binaries
+installed by homebrew.
 
 ## Building
 
