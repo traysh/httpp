@@ -16,7 +16,14 @@ public:
     const static size_t BufferSize = 1024; // FIXME
 
     SocketStreamBuffer(T& connection)
-        : std::streambuf(), _connection(connection) {}
+        : std::streambuf(), _connection(connection) {
+        overflow();
+        setg(_buffer[0], _buffer[0], _buffer[0]);
+    }
+
+    void Reset() {
+        seekpos(0, std::ios_base::in);
+    }
 
 
 protected:

@@ -8,7 +8,7 @@ template <int N = 1024>
 struct Connection {
     const static size_t BufferSize = N;
 
-    Connection(const std::vector<const char*> requests)
+    Connection(const std::vector<const char*>& requests)
         : _requests(requests) {}
 
     size_t ReadData(char* buffer, size_t size) {
@@ -22,8 +22,13 @@ struct Connection {
         return read_size;
     }
 
+    void PushData(const std::vector<const char*>& data) {
+        _requests.insert(std::end(_requests),
+                         std::begin(data), std::end(data));
+    }
+
 private:
-    const std::vector<const char*> _requests;
+    std::vector<const char*> _requests;
     size_t _request_count = 0;
 };
 }

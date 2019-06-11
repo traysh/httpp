@@ -41,6 +41,8 @@ void Server::Serve(const char* address,
         this->handleRequests();
     });
 
+    // FIXME it seems non-sense to setup a timeout to accept
+    // and then do nothing and accept again.
     while (_run) {
         auto connection = _socket.Accept(10); // FIXME hardcoded
         if (connection == nullptr) {

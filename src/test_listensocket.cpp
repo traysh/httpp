@@ -16,27 +16,29 @@ using ErrorType = SocketErrorType;
 const auto sourceAddress = "0.0.0.0";
 const unsigned short port = 9933;
 
+using ListenSocketTest = ::testing::Test;
+
 namespace {
-TEST(ListenSocket, CorrectlyInitialized) {
+TEST_F(ListenSocketTest, CorrectlyInitialized) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
 }
 
-TEST(ListenSocket, ListenSuccess) {
+TEST_F(ListenSocketTest, ListenSuccess) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port+1));
     EXPECT_TRUE(socket.Ready());
 }
 
-TEST(ListenSocket, SetReuseAddressFailAlreadyInitialized) {
+TEST_F(ListenSocketTest, SetReuseAddressFailAlreadyInitialized) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port+2));
     EXPECT_THROW(socket.SetReuseAddress(), SocketError<ErrorType::AlreadyInitialized>);
 }
 
-TEST(ListenSocket, SetReuseAddressSuccess) {
+TEST_F(ListenSocketTest, SetReuseAddressSuccess) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
@@ -45,7 +47,7 @@ TEST(ListenSocket, SetReuseAddressSuccess) {
     EXPECT_TRUE(socket.Ready());
 }
 
-TEST(ListenSocket, ListenFails) {
+TEST_F(ListenSocketTest, ListenFails) {
     mockable::listen.Register([](int fd, int backlog) noexcept(noexcept(::listen(fd, backlog))) {
         return 1;
     });
@@ -58,7 +60,7 @@ TEST(ListenSocket, ListenFails) {
     EXPECT_FALSE(socket.Ready());
 }
 
-TEST(ListenSocket, ListenTwiceFails) {
+TEST_F(ListenSocketTest, ListenTwiceFails) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
@@ -70,7 +72,7 @@ TEST(ListenSocket, ListenTwiceFails) {
     EXPECT_TRUE(socket.Ready());
 }
 
-TEST(ListenSocket, ListenInvalidAddress) {
+TEST_F(ListenSocketTest, ListenInvalidAddress) {
     const auto sourceAddress = "notaddress";
 
     ListenSocket socket;
@@ -81,7 +83,7 @@ TEST(ListenSocket, ListenInvalidAddress) {
     EXPECT_FALSE(socket.Ready());
 }
 
-TEST(ListenSocket, ListenAlreadyBound) {
+TEST_F(ListenSocketTest, ListenAlreadyBound) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
@@ -95,7 +97,7 @@ TEST(ListenSocket, ListenAlreadyBound) {
     EXPECT_FALSE(failureSocket.Ready());
 }
 
-TEST(ListenSocket, AcceptSuccess) {
+TEST_F(ListenSocketTest, AcceptSuccess) {
     mockable::select.Register(
         [](int, fd_set* readfds, fd_set*, fd_set*,
            struct timeval* timeout){
@@ -124,7 +126,7 @@ TEST(ListenSocket, AcceptSuccess) {
     EXPECT_NE(connection, nullptr);
 }
 
-TEST(ListenSocket, AcceptButNoClients) {
+TEST_F(ListenSocketTest, AcceptButNoClients) {
     ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
@@ -135,7 +137,7 @@ TEST(ListenSocket, AcceptButNoClients) {
     EXPECT_EQ(connection, nullptr);
 }
 
-TEST(ListenSocket, AcceptSelectFails) {
+TEST_F(ListenSocketTest, AcceptSelectFails) {
     mockable::select.Register(
         [](int, fd_set*, fd_set*, fd_set*,
            struct timeval*){

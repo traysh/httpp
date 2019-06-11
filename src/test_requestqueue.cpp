@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
+#include <arpa/inet.h>
+
 #include "connectionqueue.hpp"
 
-#include <arpa/inet.h>
+using ConnectionQueueTest = ::testing::Test;
 
 namespace {
 
-TEST(ConnectionQueue, InitiallyEmpty) {
+TEST_F(ConnectionQueueTest, InitiallyEmpty) {
     ConnectionQueue queue;
 
     EXPECT_TRUE(queue.Empty());
     EXPECT_EQ(queue.Size(), 0);
 }
 
-TEST(ConnectionQueue, PushIncreasesSize) {
+TEST_F(ConnectionQueueTest, PushIncreasesSize) {
     ConnectionQueue queue;
     sockaddr_in addr;
 
@@ -25,7 +27,7 @@ TEST(ConnectionQueue, PushIncreasesSize) {
     EXPECT_FALSE(queue.Empty());
 }
 
-TEST(ConnectionQueue, PushPopMakesEmpty) {
+TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
     ConnectionQueue queue;
     sockaddr_in addr;
 
@@ -39,7 +41,7 @@ TEST(ConnectionQueue, PushPopMakesEmpty) {
     EXPECT_TRUE(queue.Empty());
 }
 
-TEST(ConnectionQueue, PushPopTwiceReturnsCorrectElement) {
+TEST_F(ConnectionQueueTest, PushPopTwiceReturnsCorrectElement) {
     ConnectionQueue queue;
     sockaddr_in addr;
 
