@@ -17,7 +17,9 @@ public:
         NotProcessed, Processing, Failed, Succeed,
     };
 
-    RequestHandler(Connection& connection) : _buffer(connection) {}
+    HTTPRequest Request;
+
+    RequestHandler(Connection& connection) : _buffer(connection), _parser(_buffer) {}
 
     State Process() {
         if (_state > State::Processing) {
@@ -28,10 +30,7 @@ public:
             std::make_pair(Step::Parse, [&]() {
                 using Result = typename RequestParser<Connection>::Result;
 
-                RequestParser parser(_buffer);
-                HTTPRequest request;
-
-                auto result = parser.Parse(request);
+                auto result = _parser.Parse(Request);
                 if (result == Result::Failed) {
                     _state = State::Failed;
                 }
@@ -61,7 +60,7 @@ public:
 
             auto& func = entry.second;
             bool step_finished = func();
-            if (_state != State::Processing) {
+            if (!step_finished || _state != State::Processing) {
                 break;
             }
             if (step_finished) {
@@ -78,6 +77,6 @@ private:
     Step _step = Step::Parse;
     State _state = State::NotProcessed;
     SocketStreamBuffer<Connection> _buffer;
-    HTTPRequest _request ;
+    RequestParser<Connection> _parser;
 };
 

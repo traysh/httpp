@@ -53,8 +53,6 @@ public:
                      const std::set<char>& separators = DefaultSeparators(),
                      const std::set<char>& invalid = DefaultInvalid()) {
 
-        auto init_pos = _stream.tellg();
-
         std::stringstream ss;
         int next_char;
 
@@ -79,7 +77,6 @@ public:
 
         if (_stream.eof()) {
             _stream.clear();
-            _stream.seekg(init_pos);
             return Result::IncompleteInputData;
         }
 

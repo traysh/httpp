@@ -88,11 +88,14 @@ typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(std::iostre
     std::string method, path, protocol, protocolVersion, rest;
     std::array<std::string*, 3> values { &method, &path, &protocol };
 
+    auto initial_pos = stream.tellg();
+
     std::istream::sentry sentry(stream);
     StreamProcessor processor(stream);
     for (auto value : values) {
         auto result = processor.ExtractWord(*value);
         if (result != Result::Success) {
+            stream.seekg(initial_pos);
             return result;
         }
 
