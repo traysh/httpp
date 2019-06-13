@@ -2,13 +2,16 @@
 
 #include "requestparser.hpp"
 #include "connection_mock.hpp"
+#include "socketstreambuffer.hpp"
 
 using RequestParserTest = ::testing::Test;
 
 namespace {
 TEST_F(RequestParserTest, WellFormattedRequestLine) {
     Mock::Connection connection({"GET / HTTP/1.1\r\n\r\n"});
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -21,7 +24,9 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
 
 TEST_F(RequestParserTest, SlowClientRequestLine) {
     Mock::Connection connection({"GE"});
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -35,7 +40,9 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
 
 TEST_F(RequestParserTest, UnprocessableRequestLine) {
     Mock::Connection connection({"GET\n"});
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -50,7 +57,9 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
             "User-Agent: curl/7.54.0\r\n"
             "Accept: */*\r\n\r\n"
     });
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -78,7 +87,9 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
             "Host: localhost:9933\r\n"
             "User-Agent: cur",
     });
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -118,7 +129,9 @@ TEST_F(RequestParserTest, WellFormattedPost) {
         "Content-Length: 13\r\n\r\n"
         "{\"foo\":\"bar\"}"
      });
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 
@@ -154,7 +167,9 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
         "Content-Length: 13\n\n"
         "{\"foo\":\"bar\"}"
      });
-    RequestParser parser(connection);
+    SocketStreamBuffer buffer(connection);
+    RequestParser parser(buffer);
+
     HTTPRequest request;
     auto result = parser.Parse(request);
 

@@ -25,9 +25,8 @@ class RequestParser {
 public:
     using Result = StreamProcessor::Result;
 
-    RequestParser(T& connection,
-                  _Iterator currentStep = _parseSequence.begin()) 
-        : _buffer(connection), _currentStep(currentStep) {}
+    RequestParser(SocketStreamBuffer<T>& buffer, _Iterator currentStep = _parseSequence.begin()) 
+        : _buffer(buffer), _currentStep(currentStep) {}
 
     Result Parse(HTTPRequest& request);
 
