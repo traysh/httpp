@@ -2,9 +2,9 @@
 #include "listensocket_mocks.hpp"
 
 #include <string.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <unistd.h>
 #include <iostream>
 
 Connection::Connection(const int fd, const sockaddr_in& address)
@@ -19,7 +19,7 @@ Connection::~Connection() {
 }
 
 size_t Connection::ReadData(char* buffer, size_t size) {
-    int bytesCount = ::read(_fd, buffer, size);
+    int bytesCount = ::recv(_fd, buffer, size, 0);
     if (bytesCount < 0) { // Read error
         return 0; // TODO exception
     }

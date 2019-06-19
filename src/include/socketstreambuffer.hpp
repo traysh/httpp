@@ -15,20 +15,40 @@ class SocketStreamBuffer : public std::streambuf {
 public:
     const static size_t BufferSize = 1024; // FIXME
 
-    SocketStreamBuffer(T& connection)
-        : std::streambuf(), _connection(connection) {
+    SocketStreamBuffer(T& connection) : std::streambuf(), _connection(connection) {
         overflow();
         setg(_buffer[0], _buffer[0], _buffer[0]);
     }
 
-    void Reset() {
+    inline void Reset() {
         seekpos(0, std::ios_base::in);
+    }
+
+    inline bool Continguous(size_t size) {
+        return gptr() + size < eback() + BufferSize;
+    }
+
+    char* GetInPtr() {
+        return gptr();
     }
 
 
 protected:
     constexpr static std::ios_base::openmode any = std::ios_base::in
                                                  | std::ios_base::out;
+
+    inline char* findPtr(std::streampos sp) {
+        size_t buffer_index = sp / BufferSize;
+        char* buffer = _buffer[buffer_index];
+        size_t buffer_pos = sp % BufferSize;
+
+        if (buffer_pos > inputEnd(buffer_index)) {
+            return nullptr;
+        }
+
+        return buffer + buffer_pos;
+    }
+
     virtual inline std::streampos seekpos(
             std::streampos sp,
             std::ios_base::openmode which = any) override {
@@ -37,6 +57,9 @@ protected:
         char* buffer = _buffer[buffer_index];
         size_t buffer_pos = sp % BufferSize;
 
+        if (buffer_index >= _buffer.size()) {
+            return -1;
+        }
         if (which & std::ios_base::in) {
             setg(buffer, buffer + buffer_pos, inputEnd(buffer_index));
         }
@@ -85,11 +108,15 @@ protected:
             return 0;
         }
 
-        size_t input_buffer_i = _addressToBuffer.at(eback());
-        size_t output_buffer_i =_addressToBuffer.at(pbase());
-        size_t delta = (pptr() - pbase()) - (gptr() - eback());
-        delta += (output_buffer_i - input_buffer_i) * BufferSize;
-        return delta; 
+        std::streamsize avail = egptr() - gptr();
+        if (avail == 0) {
+            if (underflow() == EOF) {
+                return -1;
+            }
+            avail = egptr() - gptr();
+        }
+
+        return egptr() - gptr(); 
     }
 
     virtual int underflow() override {
@@ -123,14 +150,15 @@ protected:
         }
 
         pbump(read_size);
-        if (eback() == pbase() && gptr() <= epptr()) {
-            setg(eback(), gptr(), std::min(egptr() + read_size, epptr()));
+        if (pptr() == epptr()) {
+            overflow();
         }
-        else {
+        _validLimit = std::max(pptr(), _validLimit);
+
+        setg(eback(), gptr(), inputEnd(eback()));
+        if (gptr() == egptr()) {
             return EOF;
         }
-
-        _validLimit = std::max(pptr(), _validLimit);
 
         return *gptr();
 
@@ -161,7 +189,6 @@ protected:
 
             using std::ios_base;
             if (showmanyc() == 0 && underflow() == EOF) {
-                // TODO wait for data?
                 break;
             }
 
@@ -170,6 +197,8 @@ protected:
             lineSize += read_size;
             n -= read_size;
         }
+
+        gbump(lineSize);
         return lineSize;
     }
 
@@ -178,6 +207,11 @@ private:
     std::vector<char*> _buffer;
     std::map<char*, size_t> _addressToBuffer;
     char* _validLimit = nullptr;
+
+    inline char* inputEnd(char* buffer_beggining) {
+        const size_t buffer_i = _addressToBuffer.at(buffer_beggining);
+        return inputEnd(buffer_i);
+    }
 
     inline char* inputEnd(const size_t buffer_index) {
         if (buffer_index == _buffer.size() - 1) {

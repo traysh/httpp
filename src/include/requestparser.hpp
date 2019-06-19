@@ -9,6 +9,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unistd.h>
 
 #include "httpexceptions.hpp"
 #include "httprequest.hpp"
@@ -19,41 +20,41 @@
 
 template<class T = Connection>
 class RequestParser {
-    using _ParseStep = StreamProcessor::Result(RequestParser::*)(std::iostream&, HTTPRequest&);
+    using _ParseStep = StreamProcessor::Result(RequestParser::*)(HTTPRequest&);
     using _Iterator = typename std::list<_ParseStep>::const_iterator;
 
 public:
     using Result = StreamProcessor::Result;
 
     RequestParser(SocketStreamBuffer<T>& buffer, _Iterator currentStep = _parseSequence.begin()) 
-        : _buffer(buffer), _currentStep(currentStep) {}
+        : _buffer(buffer), _stream(&_buffer), _currentStep(currentStep) {}
 
     Result Parse(HTTPRequest& request);
 
 private:
     SocketStreamBuffer<T> _buffer;
+    std::istream _stream;
     const static std::list<_ParseStep> _parseSequence;
     _Iterator _currentStep;
 
-    Result parseRequestLine(std::iostream& stream, HTTPRequest& request);
-    Result parseHeaders(std::iostream& stream, HTTPRequest& request);
-    Result parseBody(std::iostream& stream, HTTPRequest& request);
+    Result parseRequestLine(HTTPRequest& request);
+    Result parseHeaders(HTTPRequest& request);
+    Result parseBody(HTTPRequest& request);
 
-    inline Result streamGood(std::iostream& stream);
+    inline Result streamGood();
 
     HTTPRequest::ProtocolType mapProtocol(const std::string& str);
     HTTPRequest::MethodType mapMethod(const std::string& str);
 };
 
 template<typename T>
-typename RequestParser<T>::Result RequestParser<T>::streamGood(std::iostream& stream) {
-    if (stream.bad()) {
+typename RequestParser<T>::Result RequestParser<T>::streamGood() {
+    if (_stream.bad()) {
         return Result::Failed;
     }
-    if (stream.fail()) {
-        auto* buf = static_cast<SocketStreamBuffer<T>*>(stream.rdbuf());
-        buf->Reset();
-        stream.clear();
+    if (_stream.fail()) {
+        _buffer.Reset();
+        _stream.clear();
         return Result::IncompleteInputData;
     }
 
@@ -70,11 +71,9 @@ const std::list<typename RequestParser<T>::_ParseStep>
 
 template<typename T>
 typename RequestParser<T>::Result RequestParser<T>::Parse(HTTPRequest& request) {
-    std::iostream dataStream(&_buffer);
-
     for (; _currentStep != _parseSequence.end(); ++_currentStep) {
         auto f = *_currentStep;
-        auto result = (this->*f)(dataStream, request);
+        auto result = (this->*f)(request);
         if (result != Result::Success) {
             return result;
         }
@@ -84,28 +83,36 @@ typename RequestParser<T>::Result RequestParser<T>::Parse(HTTPRequest& request) 
 }
 
 template<typename T>
-typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(std::iostream& stream, HTTPRequest& request) {
+typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(HTTPRequest& request) {
     std::string method, path, protocol, protocolVersion, rest;
     std::array<std::string*, 3> values { &method, &path, &protocol };
 
-    auto initial_pos = stream.tellg();
+    auto initial_pos = _stream.tellg();
 
-    std::istream::sentry sentry(stream);
-    StreamProcessor processor(stream);
+    std::istream::sentry sentry(_stream);
+    (void)sentry;
+    StreamProcessor processor(_stream);
     for (auto value : values) {
         auto result = processor.ExtractWord(*value);
         if (result != Result::Success) {
-            stream.seekg(initial_pos);
+            _stream.seekg(initial_pos);
             return result;
         }
 
         // the request line must end with a newline
-        if (value != values.back() && processor.NewLine()) {
-            return Result::Failed;
+        if (value != values.back()) {
+            if (processor.NewLine()) {
+                return Result::Failed;
+            }
+        }
+        else {
+            if (!processor.NewLine() && _buffer.in_avail() == 0) {
+                return Result::IncompleteInputData;
+            }
         }
     }
-    getline(stream, rest);
-    auto result = streamGood(stream);
+    getline(_stream, rest);
+    auto result = streamGood();
     if (result != Result::Success) {
         return result;
     }
@@ -128,29 +135,31 @@ typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(std::iostre
 }
 
 template<typename T>
-typename RequestParser<T>::Result RequestParser<T>::parseHeaders(std::iostream& stream, HTTPRequest& request) {
-    std::istream::sentry sentry(stream);
-    StreamProcessor processor(stream);
-    while (stream.good() && !processor.NewLine()) {
-        std::string key, value;
-        std::string rest;
+typename RequestParser<T>::Result RequestParser<T>::parseHeaders(HTTPRequest& request) {
+    std::istream::sentry sentry(_stream);
+    (void)sentry;
+    StreamProcessor processor(_stream);
+    std::string rest;
 
-        auto initial_pos = stream.tellg();
+    while (_stream.good() && !processor.NewLine()) {
+        std::string key, value;
+
+        auto initial_pos = _stream.tellg();
 
         auto separators = processor.DefaultSeparators({':'});
         auto result = processor.ExtractWord(key, false, true,  separators);
         if (result != Result::Success) {
-            stream.seekg(initial_pos);
+            _stream.seekg(initial_pos);
             return result;
         }
 
-        if (stream.get() != ':' || !stream.good()) {
+        if (_stream.get() != ':' || !_stream.good()) {
             return Result::Failed;
         }
 
         result = processor.ExtractWord(value);
         if (result != Result::Success) {
-            stream.seekg(initial_pos);
+            _stream.seekg(initial_pos);
             return result;
         }
 
@@ -158,23 +167,61 @@ typename RequestParser<T>::Result RequestParser<T>::parseHeaders(std::iostream& 
             return Result::Failed;
         }
 
-        getline(stream, rest);
+        getline(_stream, rest);
 
         request.Header.insert_or_assign(key, value);
     }
 
+    getline(_stream, rest);
     return Result::Success;
 }
 
 template<typename T>
-typename RequestParser<T>::Result RequestParser<T>::parseBody(std::iostream& stream,
-                             HTTPRequest& request) {
-    // FIXME check content-length
-    stream << '\0';
+typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& request) {
+    // TODO handle "Transfer-Encoding" as supposed:
+    // https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html
+    const char content_length_key[] = "CONTENT-LENGTH";
+    if (request.Header.find(content_length_key) == request.Header.end()) {
+        return Result::Success;
+    }
 
-    std::stringbuf rest;
-    stream >> &rest;
-    request.Body = rest.str();
+    // FIXME move this from here
+    const size_t max_content_length = 1048576;
+    size_t content_length = std::stoul(request.Header.at("CONTENT-LENGTH"));
+    if (content_length > max_content_length) {
+        return Result::Failed;
+    }
+
+    size_t available = static_cast<size_t>(_buffer.in_avail());
+    if (request.Body.Empty() && _buffer.Continguous(content_length + 1)) {
+        if (available != content_length) {
+            return Result::IncompleteInputData;
+        }
+
+        char* body = _buffer.GetInPtr();
+        body[content_length] = 0;
+        request.Body = RequestPayload(body, content_length);
+        _buffer.pubseekoff(content_length + 1, std::ios_base::cur, std::ios_base::in);
+    }
+    else {
+        if (request.Body.Empty()) {
+            request.Body = RequestPayload(new char[content_length + 1], 0);
+        }
+
+        auto* data = request.Body.RawData();
+        _stream.read(&data[request.Body.Size()], available);
+        auto read_size = _stream.gcount();
+        if (_stream.bad()) {
+            return Result::Failed;
+        }
+
+        request.Body.SetSize(request.Body.Size() + static_cast<size_t>(read_size));
+        data[content_length] = 0;
+
+        if (request.Body.Size() < content_length) {
+            return Result::IncompleteInputData;
+        }
+    }
 
     return Result::Success;
 }

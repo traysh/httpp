@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include "requestpayload.hpp"
+
 struct HTTPRequest {
     using HeadersType = std::map<std::string, std::string>;
 
@@ -19,5 +21,5 @@ struct HTTPRequest {
     ProtocolType Protocol;
     std::string ProtocolVersion;
     HeadersType Header;
-    std::string Body;
+    RequestPayload Body;
 };

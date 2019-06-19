@@ -153,7 +153,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
     EXPECT_EQ(request.Header.size(), 5);
 
     // Body
-    EXPECT_EQ(request.Body, "{\"foo\":\"bar\"}");
+    EXPECT_STREQ(request.Body.RawData(), "{\"foo\":\"bar\"}");
 }
 
 
@@ -191,7 +191,7 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
     EXPECT_EQ(request.Header.size(), 5);
 
     // Body
-    EXPECT_EQ(request.Body, "{\"foo\":\"bar\"}");
+    EXPECT_STREQ(request.Body.RawData(), "{\"foo\":\"bar\"}");
 }
 
 }

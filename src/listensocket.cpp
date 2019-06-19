@@ -3,12 +3,12 @@
 #include "listensocket_mocks.hpp"
 #include "connection.hpp"
 
-#include <string.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/time.h>
-
+#include <fcntl.h>
 #include <iostream>
+#include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 using namespace std;
 using ErrorType = SocketErrorType;
@@ -21,7 +21,7 @@ ListenSocket::ListenSocket() : _fd(socket(AF_INET, SOCK_STREAM, 0))
 ListenSocket::~ListenSocket()
 {
     if (close(_fd) != 0) {
-        std::cerr << "Error closing socket" << std::endl;
+        std::cerr << __FILE__ " - Error closing socket" << std::endl;
     }
 }
 
@@ -102,6 +102,11 @@ Connection::Ptr ListenSocket::Accept(const int timeout_ms) {
     int connfd = mockable::accept(_fd,
                                   reinterpret_cast<struct sockaddr*>(&connection_address),
                                   &connection_address_size);
+
+    int result = mockable::fcntl(connfd, F_SETFL, fcntl(connfd, F_GETFL, 0) | O_NONBLOCK);
+    if (result != 0) {
+        throw SocketError<ErrorType::SetNoWaitError>();
+    }
 
     return std::unique_ptr<Connection>(
             new Connection(connfd, connection_address));

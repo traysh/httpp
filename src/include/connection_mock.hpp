@@ -13,7 +13,8 @@ struct Connection {
 
     size_t ReadData(char* buffer, size_t size) {
         if (_request_count == _requests.size()) {
-            return 0; // TODO exception
+            // Data is no yet available and this is ok
+            return 0;
         }
 
         const char* request = _requests[_request_count++];

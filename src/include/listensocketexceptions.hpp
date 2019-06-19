@@ -4,7 +4,7 @@
 
 enum class SocketErrorType {
     AlreadyInitialized, ConvertAddress, BindError, ListenError,
-    SelectError, SetReuseAddressError, Unready, 
+    SelectError, SetReuseAddressError, SetNoWaitError, Unready, 
 };
 
 template <SocketErrorType ErrorType>
@@ -46,6 +46,10 @@ constexpr const char* SocketError<SocketErrorType::SelectError>
 template<>
 constexpr const char* SocketError<SocketErrorType::SetReuseAddressError>
     ::_message = "Failed setting to reuse address";
+
+template<>
+constexpr const char* SocketError<SocketErrorType::SetNoWaitError>
+    ::_message = "Failed setting socket O_NOWAIT";
 
 template<>
 constexpr const char* SocketError<SocketErrorType::Unready>

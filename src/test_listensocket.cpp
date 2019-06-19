@@ -114,6 +114,19 @@ TEST_F(ListenSocketTest, AcceptSuccess) {
         }
     );
 
+    mockable::fcntl.Register(
+        [](int , int , int){
+            return 0;
+        }
+    );
+
+    mockable::fcntl.Register(
+        [](int , int , int){
+            return 0;
+        }
+    );
+
+
     mockable::close.Register([](int){ return 0; });
 
     ListenSocket socket;

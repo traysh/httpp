@@ -33,7 +33,6 @@ TEST_F(SocketStreamTest, ReadLineReadilyAvailable) {
 
     stream.getline(readBuffer, sizeof(readBuffer));
     EXPECT_STREQ((char*)readBuffer, "");
-    EXPECT_TRUE(stream.eof());
 }
 
 TEST_F(SocketStreamTest, ReadLineWithASmallBuffer) {
@@ -130,6 +129,8 @@ TEST_F(SocketStreamBigLineTest, ReadLineBiggerThanBuffer) {
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
+    auto read_size = stream.gcount();
+    stream.getline(&_read_buffer[read_size], _read_buffer_size - read_size); 
     ASSERT_EQ((char*)_read_buffer, _line);
 }
 

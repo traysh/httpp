@@ -1,9 +1,10 @@
 #include "server.hpp"
 
 #include "connection.hpp"
-#include "socketstreambuffer.hpp"
-#include "requestparser.hpp"
 #include "httprequest.hpp"
+#include "requesthandler.hpp"
+#include "requestparser.hpp"
+#include "socketstreambuffer.hpp"
 
 #include <string.h>
 #include <istream>
@@ -62,17 +63,13 @@ void Server::handleRequests() {
         }
 
         auto connection = _queue.PopFront();
-        // auto request = RequestParser::parse(connection);
-
-        SocketStreamBuffer buffer(*connection);
-        std::istream stream(&buffer);
 
         // TODO router
         auto result = std::async(std::launch::async, [&]() {
+            RequestHandler handler(*connection);
+            while (handler.Process() == RequestHandler<Connection>::State::Processing);
             *connection << "olá\n";
-            std::string s;
-            stream >> s;
-            std::cout << s << std::endl;
+            std::cout << "Saindo!" << std::endl;
         });
     }
 }

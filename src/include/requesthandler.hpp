@@ -63,9 +63,8 @@ public:
             if (!step_finished || _state != State::Processing) {
                 break;
             }
-            if (step_finished) {
-                _step = static_cast<Step>(static_cast<int>(_step) + 1);
-            }
+
+            _step = static_cast<Step>(static_cast<int>(_step) + 1);
         }
 
         return _state;
