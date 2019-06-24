@@ -2,6 +2,7 @@
 
 #include "connection.hpp"
 #include "httprequest.hpp"
+#include "httpresponse.hpp"
 #include "requesthandler.hpp"
 #include "requestparser.hpp"
 #include "socketstreambuffer.hpp"
@@ -14,14 +15,13 @@
 #include <chrono>
 #include <thread>
 
-Server::Server() {
-}
-
-void Server::SetReuseAddress(const bool& reuseAddress) {
+template <class ConnectionType>
+void Server<ConnectionType>::SetReuseAddress(const bool& reuseAddress) {
     _socket.SetReuseAddress(reuseAddress);
 }
 
-void Server::showStartupInfo(const char* address,
+template <class ConnectionType>
+void Server<ConnectionType>::showStartupInfo(const char* address,
                              const unsigned short& port) {
     std::stringstream ss;
     ss << "Listening on port " << port;
@@ -33,7 +33,8 @@ void Server::showStartupInfo(const char* address,
     std::cout << ss.str() << std::endl;
 }
 
-void Server::Serve(const char* address,
+template <class ConnectionType>
+void Server<ConnectionType>::Serve(const char* address,
                    const unsigned short& port) {
     showStartupInfo(address, port);
     _socket.Listen(address, port);
@@ -54,7 +55,8 @@ void Server::Serve(const char* address,
     }
 }
 
-void Server::handleRequests() {
+template <class ConnectionType>
+void Server<ConnectionType>::handleRequests() {
     while (_run) {
         if (_queue.Empty()) {
             using namespace std;
@@ -64,12 +66,30 @@ void Server::handleRequests() {
 
         auto connection = _queue.PopFront();
 
-        // TODO router
+        // FIXME use a thread pool
         auto result = std::async(std::launch::async, [&]() {
             RequestHandler handler(*connection);
-            while (handler.Process() == RequestHandler<Connection>::State::Processing);
-            *connection << "olá\n";
-            std::cout << "Saindo!" << std::endl;
+            for (auto i = 0; i < 60; ++i) { // FIXME
+                if (handler.Process() != RequestHandler<Connection>::State::Processing ) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+
+            auto controller = _router.Get(handler.Request.Path,
+                                          handler.Request.Method);
+            if (controller != nullptr) {
+                HTTPResponse response(*connection);
+                controller(handler.Request, response);
+            }
+            else {
+                // TODO make customizable
+                *connection << "HTTP/1.1 404 Not found\r\n"
+                               "Connection: Close\r\n\r\n"
+                               "Not found\r\n";
+            }
         });
     }
 }
+
+template class Server<Connection>;

@@ -26,3 +26,11 @@ TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
     EXPECT_EQ(state, State::Succeed);
 }
 
+/*
+TEST_F(RequestHandlerTest, RegisterGETRoute) {
+    Mock::Connection connection({
+        "GET /test HTTP/1.1\r\n\r\n"
+    });
+    RequestHandler handler(connection);
+}
+*/

@@ -10,11 +10,19 @@ public:
     RequestPayload(std::unique_ptr<char[]> raw_data, size_t size)
         : _ownData(std::move(raw_data)), _size(size) {}
 
-    inline bool Empty() {
+    inline bool Empty() const {
         return !_data && !_ownData;
     }
 
-    inline char* RawData() {
+    inline const char* CStr() const {
+        if (Empty()) {
+            return "";
+        }
+
+        return _data == nullptr ? _ownData.get() : _data;
+    }
+
+    inline char* Buffer() {
         return _data == nullptr ? _ownData.get() : _data;
     }
 

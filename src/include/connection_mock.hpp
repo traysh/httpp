@@ -11,6 +11,28 @@ struct Connection {
     Connection(const std::vector<const char*>& requests)
         : _requests(requests) {}
 
+    template<class T,
+             typename = std::enable_if_t<!std::is_array<T>::value
+                                         && !std::is_pointer<T>::value>
+    >
+    inline Connection& operator<<(const T& data) {
+        const std::string text = std::to_string(data);
+        std::cout << "Converting to string: " << data << " -> " << text << std::endl;
+        *this << text;
+        return *this;
+    }
+
+    template<>
+    inline Connection& operator<<(const char& c) {
+        _outputBuffer << c;
+        return *this;
+    }
+
+    inline auto& operator<<(const std::string& text) {
+        _outputBuffer << text;
+        return *this;
+    }
+
     size_t ReadData(char* buffer, size_t size) {
         if (_request_count == _requests.size()) {
             // Data is no yet available and this is ok
@@ -28,8 +50,15 @@ struct Connection {
                          std::begin(data), std::end(data));
     }
 
+    auto OutputBuffer() {
+        auto data = _outputBuffer.str();
+        _outputBuffer.clear();
+        return data;
+    }
+
 private:
     std::vector<const char*> _requests;
     size_t _request_count = 0;
+    std::stringstream _outputBuffer;
 };
 }

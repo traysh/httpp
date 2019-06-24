@@ -2,18 +2,22 @@
 
 #include <list>
 
-#include "listensocket.hpp"
 #include "connectionqueue.hpp"
+#include "listensocket.hpp"
+#include "router.hpp"
 
+template<class ConnectionType = Connection>
 class Server {
 public:
-    Server();
-
     inline void Serve(const unsigned short& port) {
         return Serve("0.0.0.0", port);
     }
     void Serve(const char* address, const unsigned short& port);
     void SetReuseAddress(const bool& reuseAddress = true);
+
+    auto& GetRouter() {
+        return _router;
+    }
 
 private:
     void showStartupInfo(const char* address,
@@ -24,4 +28,5 @@ private:
 
     bool _run = true;
     ConnectionQueue _queue;
+    Router<ConnectionType> _router;
 };

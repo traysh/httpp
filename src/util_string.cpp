@@ -7,11 +7,11 @@
 namespace Util {
 namespace String {
     std::string ToUpper(const std::string& s) {
-        std::string transformed = s;
-		std::transform(s.begin(), s.end(), transformed.begin(),
-                       [](unsigned char c) -> unsigned char {
-                           return std::toupper(c);
-                      });
+        std::string transformed;
+		std::transform(s.begin(), s.end(), std::back_inserter(transformed),
+            [](unsigned char c) -> unsigned char {
+                return std::toupper(c);
+            });
 
         return transformed;
     }

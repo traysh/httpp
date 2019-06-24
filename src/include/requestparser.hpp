@@ -188,6 +188,10 @@ typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& reque
     // FIXME move this from here
     const size_t max_content_length = 1048576;
     size_t content_length = std::stoul(request.Header.at("CONTENT-LENGTH"));
+    if (content_length == 0) {
+        return Result::Success;
+    }
+
     if (content_length > max_content_length) {
         return Result::Failed;
     }
@@ -208,7 +212,7 @@ typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& reque
             request.Body = RequestPayload(new char[content_length + 1], 0);
         }
 
-        auto* data = request.Body.RawData();
+        auto* data = request.Body.Buffer();
         _stream.read(&data[request.Body.Size()], available);
         auto read_size = _stream.gcount();
         if (_stream.bad()) {
