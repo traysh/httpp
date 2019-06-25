@@ -53,7 +53,8 @@ TEST_F(HTTPResponseTest, WriteAsyncFlush) {
     response.Flush();
 
     std::stringstream expected;
-    expected << "HTTP/1.1 200 OK\r\n" << "Test data: " << 3 << '\n';
+    expected << "HTTP/1.1 200 OK\r\n" << "CONTENT-LENGTH: 13\r\n\r\n"
+             << "Test data: " << 3 << '\n';
     EXPECT_EQ(connection.OutputBuffer(), expected.str());
 }
 
