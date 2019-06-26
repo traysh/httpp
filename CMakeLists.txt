@@ -92,12 +92,6 @@ add_custom_target(test-unit
                                 --exclude-directories googletest|build
                                 --filter ${PROJECT_SOURCE_DIR}/src
                                 --exclude \.\./.*/test_.*|\.\./.*_prod\..*
-                  COMMAND [ -f ../.coveralls.yml ]
-                          && echo "Uploading coverage report..."
-                          && cd "${PROJECT_SOURCE_DIR}"
-                          && coveralls -i src -E .*/test.* -E .*_prod\..*
-                                       --gcov ${GCOV_BIN}
-                                       --gcov-options '\-lp' &> /dev/null
                   VERBATIM
                   DEPENDS unit)
 add_custom_target(test-debug
