@@ -1,6 +1,6 @@
-# What is it?
+[![Coverage Status](https://coveralls.io/repos/github/traysh/httpp/badge.svg?branch=master)](https://coveralls.io/github/traysh/httpp?branch=master)
 
-In-development C++ web backend framework
+In-development Modern C++ web backend framework
 
 # Goals
 
