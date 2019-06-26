@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+
+PROJECT_DIR="$(git rev-parse --absolute-git-dir)/.."
+GCOV="llvm-cov gcov"
+
+set -e
+
+if [ -f "${PROJECT_DIR}/.coveralls.yml" ]; then
+    cd "${PROJECT_DIR}"
+
+    echo "Running tests..."
+    mkdir -p build && cd build
+    cmake .. && make VERBOSE=1 -j9 test
+
+    echo "Uploading coverage report..."
+    cd "${PROJECT_DIR}"
+    coveralls -i src -E .*/test.* -E .*_prod\..* \
+              --gcov "${GCOV}"                   \
+              --gcov-options '\-lp' &> /dev/null
+else
+    echo "Not updating coverage reports: configuration file not found"
+fi
+
