@@ -1,7 +1,5 @@
 #include "server.hpp"
 
-#include <iostream>
-
 int main() {
     const unsigned short port = 9933;
 
@@ -9,15 +7,20 @@ int main() {
     server.SetReuseAddress();
 
     auto& router = server.GetRouter();
+    using Method = HTTPRequest::MethodType;
     router.Add({
-        { "/ping", HTTPRequest::MethodType::Get,
-            [](const auto& request, auto& response) {
-                response << "Hello world from " << request.Path;
+        { "/ping", Method::Get,
+            [](const auto&, auto& response) {
+                response << "pong";
         }}, 
-        { "/echo", HTTPRequest::MethodType::Post,
+        { "/hi", Method::Get,
+            [](const auto& request, auto& response) {
+                response << "Hello from " << request.Path;
+        }},
+        { "/echo", Method::Post,
             [](const auto& request, auto& response) {
                 response << request.Body.CStr();
-        }}
+        }},
     });
 
     server.Serve(port);
