@@ -1,14 +1,65 @@
 [![Coverage Status](https://coveralls.io/repos/github/traysh/httpp/badge.svg?branch=master)](https://coveralls.io/github/traysh/httpp?branch=master)
 
-In-development Modern C++ web backend framework
+In-development easy to use Modern C++ web backend framework.
+
+### Table of Contents
+- [Usage Example](#usage-example)
+- [Goals](#goals)
+- [How to build on Mac or Linux](#how-to-build-on-mac-or-linux)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
+- [Roadmap](#roadmap)
+- [TODO](#todo)
+
+
+# Usage Example
+
+Minimal server example:
+
+```c++
+#include "server.hpp"
+
+int main() {
+    const unsigned short port = 9933;
+
+    Server server;
+
+    auto& router = server.GetRouter();
+    using Method = HTTPRequest::MethodType;
+    router.Add({
+        { "/hi", Method::Get,
+            [](const auto& request, auto& response) {
+                response << "Hello from " << request.Path;
+        }},
+        { "/echo", Method::Post,
+            [](const auto& request, auto& response) {
+                response << request.Body.CStr();
+        }},
+    });
+
+    server.Serve(port);
+
+    return 0;
+}
+```
+
+Output from calling these endpoints:
+
+```shell
+curl localhost:9933/hi  
+> Hello from /hi%
+curl --data "hello world" localhost:9933/echo
+> hello world%
+```
 
 # Goals
 
-- easy to use as most high-level language frameworks, such as the ones available for Node.js and Golang
-- easy to use the right way
-- secure
-- good performance
-- TDD: good code quality
+- **Easy to use** as most high-level language frameworks, such as the ones available for Node.js and Python.<br/>
+- **Easy to use** the right way
+- **Secure**
+- **Good performance**
+- **TDD**
+
 
 # How to build on Mac or Linux
 ## Prerequisites
@@ -64,14 +115,14 @@ installed by homebrew.
 
 # Roadmap
 
-Note this is just a proposal to be discussed between project members
+Note: this is just a proposal to be discussed between project members
 
 - version 1.0
-   - [ ] HTTP/1 support
+   - [x] HTTP/1 support
    - [x] multithreaded requests processor
    - [x] request parser providing access to HTTP request method, headers and body
    - [ ] JSON parser for this content-type
-   - [ ] router for endpoints
+   - [x] router for endpoints
    - [ ] middleware support
 - version 1.5
    - [ ] Use epoll for Linux and kqueue for MacOS (performance improvements)
