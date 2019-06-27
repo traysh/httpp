@@ -6,48 +6,50 @@
 #include <iostream>
 
 #include "connection.hpp"
-#include "httprequest.hpp"
-#include "httpresponse.hpp"
+#include "controller.hpp"
+#include "route.hpp"
 
 template <class ConnectionType = Connection>
 class Router {
         using MethodType = HTTPRequest::MethodType;
-        using Controller = void(*)(const HTTPRequest&,
-                                   HTTPResponse<ConnectionType>&);
         using KeyType = std::pair<std::string, MethodType>;
-        using RouteData = std::tuple<std::string, MethodType, Controller>;
+        using ControllerType = Controller<ConnectionType>;
 
-        std::map<KeyType, Controller> _mapping;
+        std::map<KeyType, ControllerType> _mapping;
 
     public:
+        using RouteType = Route<ConnectionType>;
+        template<class Callable>
         inline void Add(const std::string& path, const MethodType& method,
-                 Controller controller) {
+                        Callable callable) {
 
-            _mapping.emplace(std::make_pair(path, method), controller);
+            _mapping.emplace(std::make_pair(path, method),
+                             ControllerType(callable));
         }
 
-        inline void Add(const RouteData& data) {
+        inline void Add(const RouteType& data) {
             auto [path, method, controller] = data;
             Add(path, method, controller);
         }
 
-        void Add(const std::initializer_list<RouteData>& init) {
+        void Add(const std::initializer_list<RouteType>& init) {
             for (const auto& data : init) {
                 Add(data);
             }
         }
 
-        inline Controller Get(const std::string& path, const MethodType method) const {
+        inline ControllerType Get(const std::string& path,
+                              const MethodType method) const {
             return Get({path, method});
         }
 
-        Controller Get(const KeyType& key) const {
+        ControllerType Get(const KeyType& key) const {
             auto it = _mapping.find(key);
             if (it == _mapping.end()) {
-                return nullptr;
+                return ControllerType::Null();
             }
 
-            return *it->second;
+            return it->second;
         }
 };
 

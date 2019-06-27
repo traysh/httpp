@@ -10,7 +10,7 @@ int main() {
     using Method = HTTPRequest::MethodType;
     router.Add({
         { "/ping", Method::Get,
-            [](const auto&, auto& response) {
+            [](auto& response) {
                 response << "pong";
         }}, 
         { "/hi", Method::Get,

@@ -28,7 +28,7 @@ int main() {
     using Method = HTTPRequest::MethodType;
     router.Add({
         { "/hi", Method::Get,
-            [](const auto& request, auto& response) {
+            [](auto& response) {
                 response << "Hello from " << request.Path;
         }},
         { "/echo", Method::Post,

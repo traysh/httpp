@@ -78,7 +78,7 @@ void Server<ConnectionType>::handleRequests() {
 
             auto controller = _router.Get(handler.Request.Path,
                                           handler.Request.Method);
-            if (controller != nullptr) {
+            if (controller) {
                 HTTPResponse response(*connection);
                 controller(handler.Request, response);
             }

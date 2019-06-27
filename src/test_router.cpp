@@ -8,38 +8,64 @@
 using RouterTest = ::testing::Test;
 using MethodType = HTTPRequest::MethodType;
 using ConnectionMock = Mock::Connection<1024>;
+using RouterType = Router<ConnectionMock>;
 
-auto testController = [](const HTTPRequest&, HTTPResponse<ConnectionMock>&) {
-    //  Does nothing
+ConnectionMock connection({});
+HTTPRequest request;
+HTTPResponse response(connection);
+
+struct TestControllerException {};
+auto testController = [](const auto&, auto&) {
+    throw TestControllerException();
+};
+
+struct TestControllerNoRequestException {};
+auto testControllerNoRequest = [](auto&) {
+    throw TestControllerNoRequestException();
 };
 
 TEST_F(RouterTest, CallsAddRouteAndGet) {
-    Router<ConnectionMock> router;
+    RouterType router;
 
     router.Add("/test", MethodType::Get, testController);
-    EXPECT_EQ(router.Get({"/test", MethodType::Get}), testController);
+    auto callTest = router.Get({"/test", MethodType::Get});
+    EXPECT_THROW(callTest(request, response), TestControllerException); 
+
+    router.Add("/testNoRequest", MethodType::Get, testControllerNoRequest);
+    auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get});
+    EXPECT_THROW(callNoRequestTest(request, response),
+                 TestControllerNoRequestException);
 }
 
-TEST_F(RouterTest, CallsAddRouteWithPairAndGet) {
-    Router<ConnectionMock> router;
+TEST_F(RouterTest, CallsAddRouteWithTupleAndGet) {
+    RouterType router;
 
-    router.Add({"/test", MethodType::Get, testController});
-    EXPECT_EQ(router.Get("/test", MethodType::Get), testController);
+    RouterType::RouteType route({"/test", MethodType::Get, testController});
+    router.Add(route);
+    auto callTest = router.Get({"/test", MethodType::Get});
+    EXPECT_THROW(callTest(request, response), TestControllerException); 
+
+    RouterType::RouteType routeNoController({"/testNoRequest", MethodType::Get,
+                                            testControllerNoRequest});
+    router.Add(routeNoController);
+    auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get});
+    EXPECT_THROW(callNoRequestTest(request, response),
+                 TestControllerNoRequestException);
+
 }
 
 TEST_F(RouterTest, CallsAddWithMultipleRoutesAndGet) {
-    auto test2Controller = [](const HTTPRequest&,
-                              HTTPResponse<ConnectionMock>&) {
-        // Does nothing
-    };
-
-    Router<ConnectionMock> router;
+    RouterType router;
     router.Add({
         {"/test", MethodType::Get, testController},
-        {"/test2", MethodType::Get, test2Controller}
+        {"/testNoRequest", MethodType::Get, testControllerNoRequest}
     });
 
-    EXPECT_EQ(router.Get("/test", MethodType::Get), testController);
-    EXPECT_EQ(router.Get("/test2", MethodType::Get), test2Controller);
+    auto callTest = router.Get({"/test", MethodType::Get});
+    EXPECT_THROW(callTest(request, response), TestControllerException); 
+
+    auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get});
+    EXPECT_THROW(callNoRequestTest(request, response),
+                 TestControllerNoRequestException);
 }
 

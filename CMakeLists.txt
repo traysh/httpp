@@ -85,14 +85,13 @@ target_link_options(unit PRIVATE -fprofile-arcs -ftest-coverage -fstandalone-deb
 
 add_custom_target(test-unit 
                   COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'
-                                                       -exec rm {} +
+                                                     -exec rm {} +
                   COMMAND unit
                   COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp
-                                --gcov-executable ${GCOV_BIN}
-                                --exclude-directories googletest|build
+                                --gcov-executable "${GCOV_BIN}"
+                                --exclude-directories 'googletest|build'
                                 --filter ${PROJECT_SOURCE_DIR}/src
-                                --exclude \.\./.*/test_.*|\.\./.*_prod\..*
-                  VERBATIM
+                                --exclude '\.\./.*/test_.*|\.\./.*_prod\..*'
                   DEPENDS unit)
 add_custom_target(test-debug
                   COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'
