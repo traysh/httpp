@@ -19,6 +19,20 @@ class Router {
 
     public:
         using RouteType = Route<ConnectionType>;
+
+        Router()
+            : _notFoundController([](HTTPResponse<ConnectionType>& response) {
+                response.Status = HTTPResponseStatus::Type::NotFound;
+                response << "Not found\r\n";
+ 
+        }),
+              _internalErrorController([](HTTPResponse<ConnectionType>&
+                                          response) {
+                response.Status = HTTPResponseStatus::Type::InternalServerError;
+                response.Header.emplace("Connection", "Close");
+                response << "Internal server error\r\n";
+        }) {}
+
         template<class Callable>
         inline void Add(const std::string& path, const MethodType& method,
                         Callable callable) {
@@ -38,18 +52,36 @@ class Router {
             }
         }
 
-        inline ControllerType Get(const std::string& path,
-                              const MethodType method) const {
+        template<class Callable>
+        inline void SetNotFoundHandler(Callable callable) {
+            _notFoundController = ControllerType(callable);
+        }
+
+        inline const ControllerType& InternalServerErrorHandler() {
+            return _internalErrorController;
+        }
+
+        template<class Callable>
+        inline void SetInternalServerErrorHandler(Callable callable) {
+            _internalErrorController = ControllerType(callable);
+        }
+
+        inline const ControllerType& Get(const std::string& path,
+                                  const MethodType method) const {
             return Get({path, method});
         }
 
-        ControllerType Get(const KeyType& key) const {
+        const ControllerType& Get(const KeyType& key) const {
             auto it = _mapping.find(key);
             if (it == _mapping.end()) {
-                return ControllerType::Null();
+                return _notFoundController;
             }
 
             return it->second;
         }
+
+    private:
+        ControllerType _notFoundController;
+        ControllerType _internalErrorController;
 };
 

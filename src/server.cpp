@@ -68,25 +68,14 @@ void Server<ConnectionType>::handleRequests() {
 
         // FIXME use a thread pool
         auto result = std::async(std::launch::async, [&]() {
-            RequestHandler handler(*connection);
-            for (auto i = 0; i < 60; ++i) { // FIXME
-                if (handler.Process() != RequestHandler<Connection>::State::Processing ) {
+            using HandlerState = RequestHandler<Connection>::State;
+            RequestHandler handler(*connection, _router);
+            for (auto i = 0; i < 60; ++i) { // FIXME ugly
+                if (handler.Process() != HandlerState::Processing) {
                     break;
                 }
+                // FIXME should not sleep in some cases
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-
-            auto controller = _router.Get(handler.Request.Path,
-                                          handler.Request.Method);
-            if (controller) {
-                HTTPResponse response(*connection);
-                controller(handler.Request, response);
-            }
-            else {
-                // TODO make customizable
-                *connection << "HTTP/1.1 404 Not found\r\n"
-                               "Connection: Close\r\n\r\n"
-                               "Not found\r\n";
             }
         });
     }

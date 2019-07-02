@@ -16,28 +16,34 @@ class Controller {
             return Controller();
         }
 
-        Controller() : _callable(nullptr) {}
         Controller(CallableType callable) : _callable(callable) {}
         Controller(NoRequestCallableType callable) {
             if (callable == nullptr) {
                 _callable = nullptr;
             }
             else {
-                _callable = [callable](const HTTPRequest&, HTTPResponseType& response) {
+                _callable = [callable](const HTTPRequest&,
+                                       HTTPResponseType& response) {
                     callable(response);
                 };
             }
         }
 
-        operator bool() {
+        operator bool() const {
             return _callable != nullptr;
         }
 
-        auto operator()(const HTTPRequest& request, HTTPResponseType& response) {
+        auto operator() (const HTTPRequest& request,
+                               HTTPResponseType& response)  const {
             return _callable(request, response);
         }
 
     private:
-        std::function<void(const HTTPRequest&, HTTPResponse<ConnectionType>&)> _callable;
+        using WrappedCallable = std::function<void(const HTTPRequest&,
+                                                   HTTPResponseType&)>;
+        std::function<void(const HTTPRequest&,
+                           HTTPResponse<ConnectionType>&)> _callable;
+
+        Controller() : _callable(nullptr) {}
 };
 

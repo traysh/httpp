@@ -5,6 +5,7 @@
 
 #include "httprequest.hpp"
 #include "requestparser.hpp"
+#include "router.hpp"
 #include "socketstreambuffer.hpp"
 
 template <class Connection>
@@ -17,9 +18,9 @@ public:
         NotProcessed, Processing, Failed, Succeed,
     };
 
-    HTTPRequest Request;
-
-    RequestHandler(Connection& connection) : _buffer(connection), _parser(_buffer) {}
+    RequestHandler(Connection& connection, Router<Connection>& router)
+        : _buffer(connection), _parser(_buffer), _router(router),
+          _request(), _response(connection) {}
 
     State Process() {
         if (_state > State::Processing) {
@@ -30,7 +31,7 @@ public:
             std::make_pair(Step::Parse, [&]() {
                 using Result = typename RequestParser<Connection>::Result;
 
-                auto result = _parser.Parse(Request);
+                auto result = _parser.Parse(_request);
                 if (result == Result::Failed) {
                     _state = State::Failed;
                 }
@@ -42,7 +43,8 @@ public:
                 return true;
             }},
             { Step::ProcessRoute, [&]() {
-                // TODO
+                auto& controller = _router.Get(_request.Path, _request.Method);
+                controller(_request, _response);
                 return true;
             }},
             { Step::Finished, [&]() {
@@ -51,20 +53,31 @@ public:
             }},
         }; 
 
-        _state = State::Processing;
-        for (auto& entry : steps) {
-            auto& step = entry.first;
-            if (_step != step) {
-                continue;
+        try {
+            _state = State::Processing;
+            for (auto& entry : steps) {
+                const auto& [step, func] = entry;
+                if (_step != step) {
+                    continue;
+                }
+
+                bool step_finished = func();
+                if (!step_finished || _state != State::Processing) {
+                    break;
+                }
+                _step = static_cast<Step>(static_cast<int>(_step) + 1);
+            }
+        }
+        catch (const std::exception&) {
+            _state = State::Failed;
+
+            if (_response.Clear()) {
+                const auto& errorController = _router.InternalServerErrorHandler();
+                errorController(_request, _response);
+                _response.Flush();
             }
 
-            auto& func = entry.second;
-            bool step_finished = func();
-            if (!step_finished || _state != State::Processing) {
-                break;
-            }
-
-            _step = static_cast<Step>(static_cast<int>(_step) + 1);
+            return _state;
         }
 
         return _state;
@@ -77,5 +90,9 @@ private:
     State _state = State::NotProcessed;
     SocketStreamBuffer<Connection> _buffer;
     RequestParser<Connection> _parser;
+    Router<Connection>& _router;
+    HTTPRequest _request;
+    HTTPResponse<Connection> _response;
+
 };
 

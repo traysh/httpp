@@ -55,6 +55,9 @@ struct HTTPResponseStatus {
         SetStatus(code);
     };
 
+    HTTPResponseStatus(int code = 200)
+        : HTTPResponseStatus(static_cast<Type>(code)) {}
+
     operator std::string() const {
         std::stringstream stream;
         stream << HTTPVersion << " "
@@ -128,11 +131,11 @@ inline bool operator==(const HTTPResponseStatus& status,
     return other == status;
 }
 
-inline std::stringstream operator<<(std::stringstream& stream,
-                                     const HTTPResponseStatus& status) {
+inline std::ostream& operator<<(std::ostream& stream,
+                                const HTTPResponseStatus& status) {
     stream << status.HTTPVersion << " "
            << static_cast<int>(status.Code) << " "
            << status.Reason << "\r\n";
-    return std::move(stream);
+    return stream;
 }
 

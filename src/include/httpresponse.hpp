@@ -17,6 +17,7 @@ struct HTTPResponse {
 
         HTTPResponseStatus Status;
         OperationMode Mode = OperationMode::Async;
+        HeadersType Header;
 
         HTTPResponse(ConnectionType& connection,
                      StatusType code = StatusType::OK)
@@ -42,18 +43,27 @@ struct HTTPResponse {
             }
         }
 
+        inline bool Clear() {
+            if (Mode == OperationMode::Sync && _wroteHeader) {
+                return false;
+            }
+
+            _buffer.str("");
+            Status = StatusType::OK;
+            return true;
+        }
+
     private:
         ConnectionType& _connection;
         std::stringstream _buffer;
-        HeadersType _headers;
         bool _wroteHeader = false;
 
         inline auto generateAsyncHeaders(const std::string& payload) {
-            _headers.emplace(HTTPHeaderKey("Content-Length"),
+            Header.emplace(HTTPHeaderKey("Content-Length"),
                              std::to_string(payload.size()));
 
             std::stringstream stream;
-            for (const auto& [key, value] : _headers) {
+            for (const auto& [key, value] : Header) {
                 stream << static_cast<std::string>(key) << ": "
                        << value << "\r\n";
             }

@@ -17,7 +17,6 @@ struct Connection {
     >
     inline Connection& operator<<(const T& data) {
         const std::string text = std::to_string(data);
-        std::cout << "Converting to string: " << data << " -> " << text << std::endl;
         *this << text;
         return *this;
     }
