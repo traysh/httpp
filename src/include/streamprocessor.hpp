@@ -7,7 +7,7 @@
 
 class StreamProcessor {
 public:
-    enum class Result { Success, Failed, IncompleteInputData };
+    enum class Result { Success, Failed, IncompleteInputData, NoInputData };
 
     using CharEvalFunc = bool(*)(int);
 

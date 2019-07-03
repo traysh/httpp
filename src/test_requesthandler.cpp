@@ -5,7 +5,7 @@
 
 using RequestHandlerTest = ::testing::Test;
 using ConnectionMock = Mock::Connection<1024>;
-using State = RequestHandler<ConnectionMock>::State;
+using State = RequestHandler<ConnectionMock>::StateType;
 
 TEST_F(RequestHandlerTest, HandleSimpleGetRequest) {
     Mock::Connection connection({"GET / HTTP/1.1\r\n\r\n"});
@@ -50,6 +50,24 @@ TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
     EXPECT_EQ(state, State::Succeed);
 }
 
+TEST_F(RequestHandlerTest, HandleSimpleReallySlowGetRequest) {
+    Mock::Connection connection({"GET / HT"});
+    Router<ConnectionMock>  router;
+    RequestHandler handler(connection, router);
+
+    auto state = handler.Process();
+    EXPECT_EQ(state, State::Processing);
+
+    connection.PushData({""});
+    state = handler.Process();
+    EXPECT_EQ(state, State::WaitingForData);
+
+    connection.PushData({"", "TP/1.1\r\n\r\n"});
+    state = handler.Process();
+    EXPECT_EQ(state, State::Succeed);
+}
+
+
 TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
     Mock::Connection connection({"GET / HTTP/1.1\r\n"
                                  "Header: Tr"});
@@ -77,8 +95,7 @@ TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
 
     EXPECT_EQ(connection.OutputBuffer(),
               "HTTP/1.1 500 Internal Server Error\r\n"
-              "CONNECTION: Close\r\n"
-              "CONTENT-LENGTH: 23\r\n\r\n"
+              "CONNECTION: Close\r\n\r\n"
               "Internal server error\r\n");
     EXPECT_EQ(state, State::Failed);
 }

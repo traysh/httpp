@@ -35,7 +35,7 @@ TEST_F(RouterTest, GetDefaultNotFoundRoute) {
 
     EXPECT_EQ(connection.OutputBuffer(), 
               "HTTP/1.1 404 Not Found\r\n"
-              "CONTENT-LENGTH: 11\r\n\r\n"
+              "CONNECTION: Close\r\n\r\n"
               "Not found\r\n");
 }
 

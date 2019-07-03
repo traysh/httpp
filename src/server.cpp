@@ -56,9 +56,9 @@ void Server<ConnectionType>::Serve(const char* address,
 template <class ConnectionType>
 void Server<ConnectionType>::handleRequests() {
     while (_run) {
+        using namespace std;
         if (_queue.Empty()) {
-            using namespace std;
-            this_thread::sleep_for(chrono::milliseconds(50));
+            this_thread::sleep_for(chrono::milliseconds(50)); // FIXME
             continue;
         }
 
@@ -66,14 +66,24 @@ void Server<ConnectionType>::handleRequests() {
 
         // FIXME use a thread pool
         auto result = std::async(std::launch::async, [&]() {
-            using HandlerState = RequestHandler<Connection>::State;
+            using HandlerState = RequestHandler<Connection>::StateType;
             RequestHandler handler(*connection, _router);
-            for (auto i = 0; i < 60; ++i) { // FIXME ugly
-                if (handler.Process() != HandlerState::Processing) {
+
+            for (auto age = handler.Age(); age <= chrono::seconds(3); // FIXME
+                 age = handler.Age()) {
+
+                auto state = handler.Process();
+                if (state > HandlerState::Processing) {
                     break;
                 }
-                // FIXME should not sleep in some cases
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                
+                if (state == HandlerState::WaitingForData) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                }
+            }
+
+            if (handler.Step() != decltype(handler)::StepType::Finished) {
+                handler.Timeout();
             }
         });
     }

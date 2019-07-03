@@ -23,6 +23,7 @@ class Router {
         Router()
             : _notFoundController([](HTTPResponse<ConnectionType>& response) {
                 response.Status = HTTPResponseStatus::Type::NotFound;
+                response.Header.emplace("Connection", "Close");
                 response << "Not found\r\n";
  
         }),

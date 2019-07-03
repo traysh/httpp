@@ -95,6 +95,12 @@ typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(HTTPRequest
     for (auto value : values) {
         auto result = processor.ExtractWord(*value);
         if (result != Result::Success) {
+            auto pos = _stream.tellg();
+
+            if (result == Result::IncompleteInputData && pos == initial_pos) {
+                return Result::NoInputData;
+            }
+            
             _stream.seekg(initial_pos);
             return result;
         }
@@ -149,6 +155,12 @@ typename RequestParser<T>::Result RequestParser<T>::parseHeaders(HTTPRequest& re
         auto separators = processor.DefaultSeparators({':'});
         auto result = processor.ExtractWord(key, false, true,  separators);
         if (result != Result::Success) {
+            auto pos = _stream.tellg();
+
+            if (result == Result::IncompleteInputData && pos == initial_pos) {
+                return Result::NoInputData;
+            }
+            
             _stream.seekg(initial_pos);
             return result;
         }
@@ -159,6 +171,12 @@ typename RequestParser<T>::Result RequestParser<T>::parseHeaders(HTTPRequest& re
 
         result = processor.ExtractWord(value);
         if (result != Result::Success) {
+            auto pos = _stream.tellg();
+
+            if (result == Result::IncompleteInputData && pos == initial_pos) {
+                return Result::NoInputData;
+            }
+ 
             _stream.seekg(initial_pos);
             return result;
         }

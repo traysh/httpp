@@ -6,6 +6,7 @@
 #include "connection.hpp"
 #include "httpheaderkey.hpp"
 #include "httpresponsestatus.hpp"
+#include "util_string.hpp"
 
 template<typename ConnectionType = Connection>
 struct HTTPResponse {
@@ -59,8 +60,16 @@ struct HTTPResponse {
         bool _wroteHeader = false;
 
         inline auto generateAsyncHeaders(const std::string& payload) {
-            Header.emplace(HTTPHeaderKey("Content-Length"),
-                             std::to_string(payload.size()));
+            using namespace Util::String;
+
+            if (auto it = Header.find(HTTPHeaderKey("Connection"));
+                it == Header.end() || ToUpper(Trim(it->second)) != "CLOSE") {
+
+                if (payload.size() > 0) {
+                    Header.emplace(HTTPHeaderKey("Content-Length"),
+                                   std::to_string(payload.size()));
+                }
+            }
 
             std::stringstream stream;
             for (const auto& [key, value] : Header) {
