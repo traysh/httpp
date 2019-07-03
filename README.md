@@ -36,6 +36,10 @@ int main() {
                 response << request.Body.CStr();
         }},
     });
+    router.SetNotFoundHandler([](auto& response) {
+        response.Status = HTTPResponseStatus::Type::NotFound;
+        response << "sorry, I don't know that URL";
+    });
 
     server.Serve(port);
 
@@ -46,10 +50,28 @@ int main() {
 Output from calling these endpoints:
 
 ```shell
-curl localhost:9933/hi  
-> Hello from /hi%
-curl --data "hello world" localhost:9933/echo
-> hello world%
+$ curl localhost:9933/hi  
+Hello from /hi%
+$ curl --data "hello world" localhost:9933/echo
+hello world%
+$ curl -v localhost:9933/blah
+Trying ::1...
+* TCP_NODELAY set
+* Connection failed
+* connect to ::1 port 9933 failed: Connection refused
+*   Trying 127.0.0.1...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 9933 (#0)
+> GET /pinga HTTP/1.1
+> Host: localhost:9933
+> User-Agent: curl/7.54.0
+> Accept: */*
+>
+< HTTP/1.1 404 Not Found
+< CONTENT-LENGTH: 28
+<
+* Connection #0 to host localhost left intact
+sorry, I don't know that URL%
 ```
 
 # Goals

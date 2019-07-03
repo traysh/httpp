@@ -22,6 +22,10 @@ int main() {
                 response << request.Body.CStr();
         }},
     });
+    router.SetNotFoundHandler([](auto& response) {
+        response.Status = HTTPResponseStatus::Type::NotFound;
+        response << "sorry, I don't know that URL";
+    });
 
     server.Serve(port);
 
