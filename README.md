@@ -56,9 +56,11 @@ curl --data "hello world" localhost:9933/echo
 
 - **Easy to use** as most high-level language frameworks, such as the ones available for Node.js and Python.<br/>
 - **Easy to use** the right way
+- **Cross platform** must support at least Linux and MacOS
+- **Cross architecture** must support at least x86 and ARMv5 and later
+- **TDD** to ensure testable and high quality code
+- **Good performance** though good usability is preferred over it
 - **Secure**
-- **Good performance**
-- **TDD**
 
 
 # How to build on Mac or Linux
