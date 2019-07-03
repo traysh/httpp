@@ -87,10 +87,12 @@ Connection::Ptr ListenSocket::Accept(const int timeout_ms) {
         (timeout_ms % 1000) * 1000,  // .tv_usec
     };
 
-    if (mockable::select (FD_SETSIZE, &read_fd_set, nullptr, nullptr, &timeout) < 0) {
+    auto* timeout_ptr = timeout_ms != 0 ? &timeout : nullptr;
+    if (mockable::select(FD_SETSIZE, &read_fd_set, nullptr, nullptr,
+                         timeout_ptr) < 0) {
         throw SocketError<ErrorType::SelectError>();
     }
-    if (!FD_ISSET (_fd, &read_fd_set)) {
+    if (!FD_ISSET(_fd, &read_fd_set)) {
         return std::unique_ptr<Connection>(nullptr);
     }
 
