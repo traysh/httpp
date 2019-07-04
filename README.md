@@ -62,13 +62,13 @@ Trying ::1...
 *   Trying 127.0.0.1...
 * TCP_NODELAY set
 * Connected to localhost (127.0.0.1) port 9933 (#0)
-> GET /pinga HTTP/1.1
+> GET /blah HTTP/1.1
 > Host: localhost:9933
 > User-Agent: curl/7.54.0
 > Accept: */*
 >
 < HTTP/1.1 404 Not Found
-< CONTENT-LENGTH: 28
+< CONNECTION: Close
 <
 * Connection #0 to host localhost left intact
 sorry, I don't know that URL%
