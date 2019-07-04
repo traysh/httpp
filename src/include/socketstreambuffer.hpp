@@ -20,6 +20,12 @@ public:
         setg(_buffer[0], _buffer[0], _buffer[0]);
     }
 
+    ~SocketStreamBuffer() {
+        for (auto* buffer : _buffer) {
+            delete[] buffer;
+        }
+    }
+
     inline void Reset() {
         seekpos(0, std::ios_base::in);
     }

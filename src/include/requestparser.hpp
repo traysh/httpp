@@ -32,7 +32,7 @@ public:
     Result Parse(HTTPRequest& request);
 
 private:
-    SocketStreamBuffer<T> _buffer;
+    SocketStreamBuffer<T>& _buffer;
     std::istream _stream;
     const static std::list<_ParseStep> _parseSequence;
     _Iterator _currentStep;

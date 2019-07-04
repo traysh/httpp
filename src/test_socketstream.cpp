@@ -90,7 +90,8 @@ public:
         std::streamsize size = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        _data = new char[size];
+        _data = new char[size + 1];
+        _data[size] = 0;
         ASSERT_TRUE(file.read(_data, size));
 
         std::string requestData(_data);
@@ -108,7 +109,7 @@ public:
 
     static void TearDownTestCase() {
         delete[] _data;
-        _data = nullptr;
+        delete[] _read_buffer;
     }
   
 protected:
