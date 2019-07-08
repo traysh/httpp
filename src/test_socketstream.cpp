@@ -178,7 +178,8 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromCurrent) {
     stream.getline(_read_buffer, _read_buffer_size);
     ASSERT_EQ((char*)_read_buffer, _line);
 
-    sbuf.pubseekoff(-buffer_size, std::ios_base::cur, std::ios_base::in);
+    sbuf.pubseekoff(-static_cast<std::streampos>(buffer_size),
+                    std::ios_base::cur, std::ios_base::in);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
     EXPECT_EQ((char*)_read_buffer, _line.substr(_line.size() + 1 -buffer_size,
@@ -194,7 +195,8 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromEnd) {
     stream.getline(_read_buffer, _read_buffer_size);
     ASSERT_EQ((char*)_read_buffer, _line);
 
-    sbuf.pubseekoff(-buffer_size, std::ios_base::end, std::ios_base::in);
+    sbuf.pubseekoff(-static_cast<std::streampos>(buffer_size),
+                    std::ios_base::end, std::ios_base::in);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
     EXPECT_EQ((char*)_read_buffer, _line.substr(strlen(_data) -buffer_size, 
@@ -259,7 +261,8 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromCurrent) {
     _read_buffer[strlen(_read_buffer)] = '\n';
     ASSERT_STREQ((char*)_read_buffer, &_data[_line.size() +1]);
 
-    sbuf.pubseekoff(-buffer_size/2, std::ios_base::cur, std::ios_base::out);
+    sbuf.pubseekoff(-static_cast<std::streampos>(buffer_size)/2,
+                    std::ios_base::cur, std::ios_base::out);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
     EXPECT_EQ(_read_buffer[0], 0);
@@ -268,7 +271,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromCurrent) {
     stream.getline(_read_buffer, buffer_size);
     std::string substr = std::string(&_data[strlen(_data) - buffer_size])
                              .substr(0, 2*buffer_size -strlen(_data));
-    EXPECT_EQ((char*)_read_buffer, substr);
+    EXPECT_EQ(_read_buffer, substr);
 }
 
 // FIXME this test is just a lie as the test above.
@@ -285,7 +288,8 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromEnd) {
     _read_buffer[strlen(_read_buffer)] = '\n';
     ASSERT_STREQ((char*)_read_buffer, &_data[_line.size() +1]);
 
-    sbuf.pubseekoff(-1.5*buffer_size, std::ios_base::end, std::ios_base::out);
+    sbuf.pubseekoff(-1.5*static_cast<std::streampos>(buffer_size),
+                    std::ios_base::end, std::ios_base::out);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
     EXPECT_EQ(_read_buffer[0], 0);
