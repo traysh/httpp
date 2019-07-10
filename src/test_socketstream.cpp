@@ -245,59 +245,42 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromBeggining) {
                 .substr(0, 2*buffer_size -strlen(_data)));
 }
 
-// FIXME this test is a lie. After stream.clear(), the data is copied from
-// the last buffer[0] from connection, so the offset in pubseekoff makes
-// no difference.
 TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromCurrent) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
-    ConnectionMock connection({buffer[0], buffer[1], buffer[0], buffer[0]});
+    ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
     SocketStreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
-    stream.getline(_read_buffer, _read_buffer_size);
-    ASSERT_EQ((char*)_read_buffer, _line);
-    memset(_read_buffer, 0, _read_buffer_size);
-    stream.getline(_read_buffer, _read_buffer_size);
-    _read_buffer[strlen(_read_buffer)] = '\n';
-    ASSERT_STREQ((char*)_read_buffer, &_data[_line.size() +1]);
+    stream.readsome(_read_buffer, buffer_size);
+    stream.readsome(&_read_buffer[buffer_size], _read_buffer_size);
+    ASSERT_STREQ((char*)_read_buffer, _data);
 
-    sbuf.pubseekoff(-static_cast<std::streampos>(buffer_size)/2,
+    sbuf.pubseekoff(static_cast<int>(buffer_size) -strlen(_data),
                     std::ios_base::cur, std::ios_base::out);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
-    EXPECT_EQ(_read_buffer[0], 0);
-    EXPECT_TRUE(stream.eof());
-    stream.clear();
-    stream.getline(_read_buffer, buffer_size);
-    std::string substr = std::string(&_data[strlen(_data) - buffer_size])
-                             .substr(0, 2*buffer_size -strlen(_data));
+    std::string substr = std::string(_data).substr(strlen(_data) - buffer_size,
+                                                   strlen(_read_buffer));
     EXPECT_EQ(_read_buffer, substr);
 }
 
-// FIXME this test is just a lie as the test above.
 TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromEnd) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
-    ConnectionMock connection({buffer[0], buffer[1], buffer[0], buffer[0]});
+    ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
     SocketStreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
-    stream.getline(_read_buffer, _read_buffer_size);
-    ASSERT_EQ((char*)_read_buffer, _line);
-    memset(_read_buffer, 0, _read_buffer_size);
-    stream.getline(_read_buffer, _read_buffer_size);
-    _read_buffer[strlen(_read_buffer)] = '\n';
-    ASSERT_STREQ((char*)_read_buffer, &_data[_line.size() +1]);
+    stream.readsome(_read_buffer, buffer_size);
+    stream.readsome(&_read_buffer[buffer_size], _read_buffer_size);
+    ASSERT_STREQ((char*)_read_buffer, _data);
 
-    sbuf.pubseekoff(-1.5*static_cast<std::streampos>(buffer_size),
+    sbuf.pubseekoff(-static_cast<int>(buffer_size),
                     std::ios_base::end, std::ios_base::out);
     memset(_read_buffer, 0, _read_buffer_size);
     stream.getline(_read_buffer, buffer_size);
-    EXPECT_EQ(_read_buffer[0], 0);
-    EXPECT_TRUE(stream.eof());
-    stream.clear();
-    stream.getline(_read_buffer, buffer_size);
-    std::string substr = std::string(&_data[strlen(_data) - buffer_size])
-                             .substr(0, 2*buffer_size -strlen(_data));
-    EXPECT_EQ((char*)_read_buffer, substr);
+    std::string substr = std::string(_data).substr(strlen(_data) - buffer_size,
+                                                   strlen(_read_buffer));
+    EXPECT_EQ(_read_buffer, substr);
+
 }
 
