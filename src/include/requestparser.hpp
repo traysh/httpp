@@ -83,7 +83,8 @@ typename RequestParser<T>::Result RequestParser<T>::Parse(HTTPRequest& request) 
 }
 
 template<typename T>
-typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(HTTPRequest& request) {
+typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(
+        HTTPRequest& request) {
     std::string method, path, protocol, protocolVersion, rest;
     std::array<std::string*, 3> values { &method, &path, &protocol };
 
@@ -95,10 +96,8 @@ typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(HTTPRequest
     for (auto value : values) {
         auto result = processor.ExtractWord(*value);
         if (result != Result::Success) {
-            auto pos = _stream.tellg();
-
-            if (result == Result::IncompleteInputData && pos == initial_pos) {
-                return Result::NoInputData;
+            if (result == Result::IncompleteInputData) {
+                result = Result::NoInputData;
             }
             
             _stream.seekg(initial_pos);
@@ -113,7 +112,7 @@ typename RequestParser<T>::Result RequestParser<T>::parseRequestLine(HTTPRequest
         }
         else {
             if (!processor.NewLine() && _buffer.in_avail() == 0) {
-                return Result::IncompleteInputData;
+                return Result::NoInputData;
             }
         }
     }
@@ -155,10 +154,8 @@ typename RequestParser<T>::Result RequestParser<T>::parseHeaders(HTTPRequest& re
         auto separators = processor.DefaultSeparators({':'});
         auto result = processor.ExtractWord(key, false, true,  separators);
         if (result != Result::Success) {
-            auto pos = _stream.tellg();
-
-            if (result == Result::IncompleteInputData && pos == initial_pos) {
-                return Result::NoInputData;
+            if (result == Result::IncompleteInputData) {
+                result = Result::NoInputData;
             }
             
             _stream.seekg(initial_pos);
@@ -171,10 +168,8 @@ typename RequestParser<T>::Result RequestParser<T>::parseHeaders(HTTPRequest& re
 
         result = processor.ExtractWord(value);
         if (result != Result::Success) {
-            auto pos = _stream.tellg();
-
-            if (result == Result::IncompleteInputData && pos == initial_pos) {
-                return Result::NoInputData;
+            if (result == Result::IncompleteInputData) {
+                result = Result::NoInputData;
             }
  
             _stream.seekg(initial_pos);
@@ -217,7 +212,7 @@ typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& reque
     size_t available = static_cast<size_t>(_buffer.in_avail());
     if (request.Body.Empty() && _buffer.Continguous(content_length + 1)) {
         if (available != content_length) {
-            return Result::IncompleteInputData;
+            return Result::NoInputData;
         }
 
         char* body = _buffer.GetInPtr();
@@ -233,6 +228,9 @@ typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& reque
         auto* data = request.Body.Buffer();
         _stream.read(&data[request.Body.Size()], available);
         auto read_size = _stream.gcount();
+        if (read_size == 0) {
+            return Result::NoInputData;
+        }
         if (_stream.bad()) {
             return Result::Failed;
         }

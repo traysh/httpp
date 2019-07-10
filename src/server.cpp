@@ -69,7 +69,7 @@ void Server<ConnectionType>::handleRequests() {
             using HandlerState = RequestHandler<Connection>::StateType;
             RequestHandler handler(*connection, _router);
 
-            for (auto age = handler.Age(); age <= chrono::seconds(3); // FIXME
+            for (auto age = handler.Age(); age <= chrono::seconds(3000); // FIXME
                  age = handler.Age()) {
 
                 auto state = handler.Process();

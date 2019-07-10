@@ -30,7 +30,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
     HTTPRequest request;
     auto result = parser.Parse(request);
 
-    EXPECT_EQ(result, decltype(parser)::Result::IncompleteInputData);
+    EXPECT_EQ(result, decltype(parser)::Result::NoInputData);
     
     connection.PushData({"T / HTTP/1.1\r\n\r\n"});
     result = parser.Parse(request);
@@ -93,7 +93,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
     HTTPRequest request;
     auto result = parser.Parse(request);
 
-    EXPECT_EQ(result, decltype(parser)::Result::IncompleteInputData);
+    EXPECT_EQ(result, decltype(parser)::Result::NoInputData);
     
     connection.PushData({
             "l/7.54.0\r\n"

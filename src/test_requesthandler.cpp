@@ -43,7 +43,7 @@ TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
     RequestHandler handler(connection, router);
 
     auto state = handler.Process();
-    EXPECT_EQ(state, State::Processing);
+    EXPECT_EQ(state, State::WaitingForData);
 
     connection.PushData({"TP/1.1\r\n\r\n"});
     state = handler.Process();
@@ -56,13 +56,13 @@ TEST_F(RequestHandlerTest, HandleSimpleReallySlowGetRequest) {
     RequestHandler handler(connection, router);
 
     auto state = handler.Process();
-    EXPECT_EQ(state, State::Processing);
+    EXPECT_EQ(state, State::WaitingForData);
 
     connection.PushData({""});
     state = handler.Process();
     EXPECT_EQ(state, State::WaitingForData);
 
-    connection.PushData({"", "TP/1.1\r\n\r\n"});
+    connection.PushData({"TP/1.1\r\n\r\n"});
     state = handler.Process();
     EXPECT_EQ(state, State::Succeed);
 }
@@ -75,7 +75,7 @@ TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
     RequestHandler handler(connection, router);
 
     auto state = handler.Process();
-    EXPECT_EQ(state, State::Processing);
+    EXPECT_EQ(state, State::WaitingForData);
 
     connection.PushData({"ue\r\n\r\n"});
     state = handler.Process();
