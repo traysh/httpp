@@ -1,13 +1,13 @@
 #pragma once
 
 #include "controller.hpp"
-#include "httprequest.hpp"
+#include "http/request_method_type.hpp"
 
 template<class ConnectionType>
 class Route {
     public:
         using ControllerType = Controller<ConnectionType>;
-        using MethodType = HTTPRequest::MethodType;
+        using MethodType = HTTP::Request::MethodType;
         using KeyType = std::pair<std::string, MethodType>;
 
         using CallableType = typename ControllerType::CallableType;

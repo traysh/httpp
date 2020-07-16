@@ -80,7 +80,7 @@ else ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 target_compile_options(unit PRIVATE -Og -ggdb3 -fprofile-arcs -ftest-coverage -fstandalone-debug
-                       -DTEST -DPROJECT_ROOT="${PROJECT_SOURCE_DIR}")
+    -DTESTING -DPROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 target_link_options(unit PRIVATE -ggdb3 -fprofile-arcs -ftest-coverage -fstandalone-debug)
 
 add_custom_target(test-unit 

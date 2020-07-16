@@ -2,21 +2,18 @@
 
 #include <map>
 
+#include "http/request_method_type.hpp"
 #include "requestpayload.hpp"
 
+//TODO(danilo.luvizotto) namespace HTTP
 struct HTTPRequest {
     using HeadersType = std::map<std::string, std::string>;
-
-    enum class MethodType {
-        Unknown, Get, Head, Post, Put, Delete,
-        Connect, Options, Trace, Patch,
-    };
 
     enum class ProtocolType {
         Unknown, HTTP,
     };
 
-    MethodType Method;
+    HTTP::Request::MethodType Method;
     std::string Path;
     ProtocolType Protocol;
     std::string ProtocolVersion;

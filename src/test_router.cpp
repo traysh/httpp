@@ -6,7 +6,7 @@
 #include "router.hpp"
 
 using RouterTest = ::testing::Test;
-using MethodType = HTTPRequest::MethodType;
+using MethodType = HTTP::Request::MethodType;
 using ConnectionMock = Mock::Connection<1024>;
 using RouterType = Router<ConnectionMock>;
 

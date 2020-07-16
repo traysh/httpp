@@ -16,7 +16,7 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result,  decltype(parser)::Result::Success);
-    EXPECT_EQ(request.Method, HTTPRequest::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
     EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
@@ -66,7 +66,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTPRequest::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
     EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
@@ -104,7 +104,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTPRequest::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
     EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
@@ -138,7 +138,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTPRequest::MethodType::Post);
+    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
     EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
@@ -176,7 +176,7 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTPRequest::MethodType::Post);
+    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
     EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");

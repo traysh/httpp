@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef TEST
+#ifdef TESTING
 #include "mock_test.hpp"
 #else
 #include "mock_prod.hpp"

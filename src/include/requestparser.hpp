@@ -44,7 +44,7 @@ private:
     inline Result streamGood();
 
     HTTPRequest::ProtocolType mapProtocol(const std::string& str);
-    HTTPRequest::MethodType mapMethod(const std::string& str);
+    HTTP::Request::MethodType mapMethod(const std::string& str);
 };
 
 template<typename T>
@@ -247,25 +247,25 @@ typename RequestParser<T>::Result RequestParser<T>::parseBody(HTTPRequest& reque
 }
 
 template<typename T>
-HTTPRequest::MethodType RequestParser<T>::mapMethod(const std::string& str) {
-    const static std::map<std::string, HTTPRequest::MethodType> m {
-        { "GET", HTTPRequest::MethodType::Get },
-        { "HEAD", HTTPRequest::MethodType::Head },
-        { "POST", HTTPRequest::MethodType::Post },
-        { "PUT", HTTPRequest::MethodType::Put },
-        { "DELETE", HTTPRequest::MethodType::Delete },
-        { "CONNECT", HTTPRequest::MethodType::Connect },
-        { "OPTIONS", HTTPRequest::MethodType::Options },
-        { "TRACE", HTTPRequest::MethodType::Trace },
-        { "PATCH", HTTPRequest::MethodType::Patch },
+HTTP::Request::MethodType RequestParser<T>::mapMethod(const std::string& str) {
+    const static std::map<std::string, HTTP::Request::MethodType> m {
+        { "GET", HTTP::Request::MethodType::Get },
+        { "HEAD", HTTP::Request::MethodType::Head },
+        { "POST", HTTP::Request::MethodType::Post },
+        { "PUT", HTTP::Request::MethodType::Put },
+        { "DELETE", HTTP::Request::MethodType::Delete },
+        { "CONNECT", HTTP::Request::MethodType::Connect },
+        { "OPTIONS", HTTP::Request::MethodType::Options },
+        { "TRACE", HTTP::Request::MethodType::Trace },
+        { "PATCH", HTTP::Request::MethodType::Patch },
     };
 
-    HTTPRequest::MethodType type;
+    HTTP::Request::MethodType type;
     try {
         type = m.at(str);
     }
     catch (const std::out_of_range& e) {
-        return HTTPRequest::MethodType::Unknown;
+        return HTTP::Request::MethodType::Unknown;
     }
 
     return type;

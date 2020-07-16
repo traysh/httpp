@@ -87,7 +87,7 @@ TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
     Router<ConnectionMock>  router;
     RequestHandler handler(connection, router);
 
-    router.Add("/", HTTPRequest::MethodType::Get, [](auto&) {
+    router.Add("/", HTTP::Request::MethodType::Get, [](auto&) {
         throw std::exception();
     });
 
@@ -110,7 +110,7 @@ TEST_F(RequestHandlerTest, CustomHandleGetRequestUncaughtException) {
         response << "We are weird and uncaught exception is ours "
                     "backend normal behavior";
     });
-    router.Add("/", HTTPRequest::MethodType::Get, [](auto&) {
+    router.Add("/", HTTP::Request::MethodType::Get, [](auto&) {
         throw std::exception();
     });
 

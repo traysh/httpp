@@ -7,7 +7,7 @@ int main() {
     server.SetReuseAddress();
 
     auto& router = server.GetRouter();
-    using Method = HTTPRequest::MethodType;
+    using Method = HTTP::Request::MethodType;
     router.Add({
         { "/ping", Method::Get,
             [](auto& response) {
