@@ -15,9 +15,12 @@ if [ -f "${PROJECT_DIR}/.coveralls.yml" ]; then
 
     echo "Uploading coverage report..."
     cd "${PROJECT_DIR}"
-    coveralls -i src -E .*/test.* -E .*_prod\..* \
+    if ! coveralls -i src -E .*/test.* -E .*_prod\..* \
               --gcov "${GCOV}"                   \
-              --gcov-options '\-lp' &> /dev/null
+              --gcov-options '\-lp' > /dev/null &> /dev/null
+    then
+        echo "$0: coveralls failed. Please check your system."
+    fi
 else
     echo "Not updating coverage reports: configuration file not found"
 fi
