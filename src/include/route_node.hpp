@@ -43,7 +43,7 @@ public:
         node_it->second.Add(Endpoint{unprocessed, endpoint.Method}, controller);
     }
 
-    inline RouteNodeLookupResponse<ControllerType> Get(const Endpoint& endpoint) {
+    inline RouteNodeLookupResponse<ControllerType> Get(const Endpoint& endpoint) const {
         using ParametersType = typename RouteNodeLookupResponse<ControllerType>::ParametersType;
 
         const auto& clean_path = Util::String::RemoveLeadingOrTrailing(endpoint.Path, '/');
