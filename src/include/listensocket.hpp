@@ -1,12 +1,15 @@
 #pragma once
 
+#include <memory>
 #include <netinet/in.h>
 
-#include "connection.hpp"
+class Connection;
 
 class ListenSocket
 {
 public:
+    using ConnectionPtr = std::unique_ptr<Connection>;
+
     ListenSocket();
     virtual ~ListenSocket();
 
@@ -14,7 +17,7 @@ public:
     void Listen(const char* address,
                 const unsigned short& port,
                 const int max_backlog = 10); // FIXME
-    Connection::Ptr Accept(const int timeout_ms = 0);
+    ConnectionPtr Accept(const int timeout_ms = 0);
     void SetReuseAddress(bool reuseAddress = true);
 
 private:

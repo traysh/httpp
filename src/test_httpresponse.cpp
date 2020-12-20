@@ -3,30 +3,29 @@
 #include <sstream>
 
 #include "connection_mock.hpp"
-#include "httpresponse.hpp"
+#include "http/response.hpp"
 
 using HTTPResponseTest = ::testing::Test;
 
-using ConnectionMock = Mock::Connection<1024>;
 using StatusType = HTTPResponseStatus::Type;
 
 TEST_F(HTTPResponseTest, CheckOKResponseMessage) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::OK);
+    HTTP::Response response(connection, StatusType::OK);
 
     EXPECT_STREQ(response.Status.Reason, "OK");
 }
 
 TEST_F(HTTPResponseTest, CheckNotFoundResponseMessage) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::NotFound);
+    HTTP::Response response(connection, StatusType::NotFound);
 
     EXPECT_STREQ(response.Status.Reason, "Not Found");
 }
 
 TEST_F(HTTPResponseTest, CheckOKResponseConvertToString) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::OK);
+    HTTP::Response response(connection, StatusType::OK);
 
     ASSERT_STREQ(response.Status.Reason, "OK");
 
@@ -38,7 +37,7 @@ TEST_F(HTTPResponseTest, CheckOKResponseConvertToString) {
 
 TEST_F(HTTPResponseTest, WriteAsyncNoFlush) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::OK);
+    HTTP::Response response(connection, StatusType::OK);
 
     response << "Test data: " << 3 << '\n';
 
@@ -47,7 +46,7 @@ TEST_F(HTTPResponseTest, WriteAsyncNoFlush) {
 
 TEST_F(HTTPResponseTest, WriteAsyncFlush) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::OK);
+    HTTP::Response response(connection, StatusType::OK);
 
     response << "Test data: " << 3 << '\n';
     response.Flush();
@@ -60,9 +59,9 @@ TEST_F(HTTPResponseTest, WriteAsyncFlush) {
 
 TEST_F(HTTPResponseTest, WriteSync) {
     ConnectionMock connection({""});
-    HTTPResponse response(connection, StatusType::OK);
+    HTTP::Response response(connection, StatusType::OK);
 
-    response.Mode = HTTPResponse<ConnectionMock>::OperationMode::Sync;
+    response.Mode = HTTP::Response::OperationMode::Sync;
     response << "Test data: " << 3 << '\n';
 
     std::stringstream expected;

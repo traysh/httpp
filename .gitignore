@@ -6,3 +6,7 @@ build
 *.swo
 Makefile
 .coveralls.yml
+.cache
+.env
+.vim.conf
+.session.vim

@@ -8,8 +8,8 @@
 #include "httpresponsestatus.hpp"
 #include "util_string.hpp"
 
-template<typename ConnectionType = Connection>
-struct HTTPResponse {
+namespace HTTP {
+struct Response {
     public:
         using StatusType = HTTPResponseStatus::Type;
         using HeadersType = std::map<HTTPHeaderKey, std::string>;
@@ -20,11 +20,11 @@ struct HTTPResponse {
         OperationMode Mode = OperationMode::Async;
         HeadersType Header;
 
-        HTTPResponse(ConnectionType& connection,
-                     StatusType code = StatusType::OK)
+        template <class ConnectionType>
+        Response(ConnectionType& connection, StatusType code = StatusType::OK)
             : Status(code), _connection(connection) {}
 
-        ~HTTPResponse() {
+        ~Response() {
             Flush();
         }
 
@@ -35,7 +35,7 @@ struct HTTPResponse {
                                                : streamInsert(_buffer, data);
         }
 
-        inline void Flush() {
+        void Flush() {
             if (Mode == OperationMode::Async) {
                 auto payload = _buffer.str();
                 _connection << static_cast<std::string>(Status);
@@ -55,11 +55,11 @@ struct HTTPResponse {
         }
 
     private:
-        ConnectionType& _connection;
+        Connection& _connection;
         std::stringstream _buffer;
         bool _wroteHeader = false;
 
-        inline auto generateAsyncHeaders(const std::string& payload) {
+        inline std::string generateAsyncHeaders(const std::string& payload) {
             using namespace Util::String;
 
             if (auto it = Header.find(HTTPHeaderKey("Connection"));
@@ -93,3 +93,4 @@ struct HTTPResponse {
             return *this;
         }
 };
+}

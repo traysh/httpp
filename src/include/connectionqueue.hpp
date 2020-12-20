@@ -2,21 +2,24 @@
 
 #include <list>
 #include <functional>
+#include <memory>
 #include <mutex>
 
-#include "connection.hpp"
+class Connection;
 
 class ConnectionQueue {
+    using ConnectionPtr = std::unique_ptr<Connection>;
+
 public:
     ConnectionQueue();
 
-    void PushBack(Connection::Ptr& connection);
-    const Connection::Ptr PopFront();
+    void PushBack(ConnectionPtr& connection);
+    const ConnectionPtr PopFront();
     bool Empty() { return _queue.empty(); }
     size_t Size() { return _queue.size(); }
 
 private:
-    using Queue = std::list<Connection::Ptr>;
+    using Queue = std::list<ConnectionPtr>;
 
     Queue _queue;
     std::mutex _m;

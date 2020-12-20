@@ -2,7 +2,7 @@
 
 #include "connection.hpp"
 #include "httprequest.hpp"
-#include "httpresponse.hpp"
+#include "http/response.hpp"
 #include "requesthandler.hpp"
 #include "requestparser.hpp"
 #include "socketstreambuffer.hpp"
@@ -15,13 +15,11 @@
 #include <chrono>
 #include <thread>
 
-template <class ConnectionType>
-void Server<ConnectionType>::SetReuseAddress(const bool& reuseAddress) {
+void Server::SetReuseAddress(const bool& reuseAddress) {
     _socket.SetReuseAddress(reuseAddress);
 }
 
-template <class ConnectionType>
-void Server<ConnectionType>::showStartupInfo(const char* address,
+void Server::showStartupInfo(const char* address,
                              const unsigned short& port) {
     std::stringstream ss;
     ss << "Listening on port " << port;
@@ -33,8 +31,7 @@ void Server<ConnectionType>::showStartupInfo(const char* address,
     std::cout << ss.str() << std::endl;
 }
 
-template <class ConnectionType>
-void Server<ConnectionType>::Serve(const char* address,
+void Server::Serve(const char* address,
                    const unsigned short& port) {
     showStartupInfo(address, port);
     _socket.Listen(address, port);
@@ -53,8 +50,7 @@ void Server<ConnectionType>::Serve(const char* address,
     }
 }
 
-template <class ConnectionType>
-void Server<ConnectionType>::handleRequests() {
+void Server::handleRequests() {
     while (_run) {
         using namespace std;
         if (_queue.Empty()) {
@@ -66,11 +62,11 @@ void Server<ConnectionType>::handleRequests() {
 
         // FIXME use a thread pool
         auto result = std::async(std::launch::async, [&]() {
-            using HandlerState = RequestHandler<Connection>::StateType;
+            using HandlerState = RequestHandler::StateType;
             RequestHandler handler(*connection, _router);
 
             for (auto age = handler.Age(); age <= chrono::seconds(3000); // FIXME
-                 age = handler.Age()) {
+                age = handler.Age()) {
 
                 auto state = handler.Process();
                 if (state > HandlerState::Processing) {
@@ -89,4 +85,3 @@ void Server<ConnectionType>::handleRequests() {
     }
 }
 
-template class Server<Connection>;

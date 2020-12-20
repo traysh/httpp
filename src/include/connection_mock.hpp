@@ -1,39 +1,33 @@
 #pragma once
 
 #include <cstring>
+#include <memory>
 #include <string>
+#include <sstream>
 #include <vector>
 
-namespace Mock {
-template <int N = 1024>
-struct Connection {
-    const static size_t BufferSize = N;
+#include "connection.hpp"
 
-    Connection(const std::vector<const char*>& requests)
+class ConnectionMock : public Connection {
+public:
+    const static size_t BufferSize = 1024;
+
+    ConnectionMock(const std::vector<const char*>& requests)
         : _requests(requests) {}
 
-    template<class T,
-             typename = std::enable_if_t<!std::is_array<T>::value
-                                         && !std::is_pointer<T>::value>
-    >
-    inline Connection& operator<<(const T& data) {
-        const std::string text = std::to_string(data);
-        *this << text;
-        return *this;
-    }
+    virtual ~ConnectionMock() {}
 
-    template<>
-    inline Connection& operator<<(const char& c) {
-        _outputBuffer << c;
-        return *this;
-    }
-
-    inline auto& operator<<(const std::string& text) {
+    virtual Connection& operator<<(const std::string& text) override {
         _outputBuffer << text;
         return *this;
     }
 
-    size_t ReadData(char* buffer, size_t size) {
+    virtual Connection& operator<<(const char& c) override {
+        _outputBuffer << c;
+        return *this;
+    }
+
+    virtual size_t ReadData(char* buffer, size_t size) override {
         if (_request_count == _requests.size()) {
             // Data is no yet available and this is ok
             return 0;
@@ -61,4 +55,4 @@ private:
     size_t _request_count = 0;
     std::stringstream _outputBuffer;
 };
-}
+

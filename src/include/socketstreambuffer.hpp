@@ -10,12 +10,11 @@
 
 #include "connection.hpp"
 
-template<class T = Connection>
 class SocketStreamBuffer : public std::streambuf {
 public:
     const static size_t BufferSize = 1024; // FIXME
 
-    SocketStreamBuffer(T& connection) : std::streambuf(), _connection(connection) {
+    SocketStreamBuffer(Connection& connection) : std::streambuf(), _connection(connection) {
         overflow();
         setg(_buffer[0], _buffer[0], _buffer[0]);
     }
@@ -48,7 +47,7 @@ protected:
         char* buffer = _buffer[buffer_index];
         size_t buffer_pos = sp % BufferSize;
 
-        if (buffer_pos > inputEnd(buffer_index)) {
+        if (buffer_pos > reinterpret_cast<size_t>(inputEnd(buffer_index))) {
             return nullptr;
         }
 
@@ -209,7 +208,7 @@ protected:
     }
 
 private:
-    T& _connection;
+    Connection& _connection;
     std::vector<char*> _buffer;
     std::map<char*, size_t> _addressToBuffer;
     char* _validLimit = nullptr;

@@ -6,10 +6,9 @@
 
 #include "controller.hpp"
 
-template<class ControllerType = Controller<Connection>>
 struct RouteNodeLookupResponse {
     using ParametersType = std::map<std::string, std::string>;
-    std::optional<ControllerType> Controller;
+    const Controller* Controller;
     ParametersType RouteParameters;
 };
 

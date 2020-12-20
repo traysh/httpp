@@ -2,6 +2,7 @@
 #include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"
 #include "connection.hpp"
+#include "connection_impl.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -73,7 +74,7 @@ void ListenSocket::Listen(const char* address,
     _ready = true;
 }
 
-Connection::Ptr ListenSocket::Accept(const int timeout_ms) {
+ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
     if (!_ready) {
         throw SocketError<ErrorType::Unready>();
     }
@@ -110,7 +111,6 @@ Connection::Ptr ListenSocket::Accept(const int timeout_ms) {
         throw SocketError<ErrorType::SetNoWaitError>();
     }
 
-    return std::unique_ptr<Connection>(
-            new Connection(connfd, connection_address));
+    return std::unique_ptr<Connection>(new ConnectionImpl(connfd, connection_address));
 }
 

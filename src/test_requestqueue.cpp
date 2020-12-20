@@ -1,25 +1,25 @@
 #include <gtest/gtest.h>
 #include <arpa/inet.h>
+#include <memory>
 
+#include "connection_mock.hpp"
 #include "connectionqueue.hpp"
 
-using ConnectionQueueTest = ::testing::Test;
+using ConnectionPtr = std::unique_ptr<Connection>;
+using ConnectionMockQueueTest = ::testing::Test;
 
 namespace {
 
-TEST_F(ConnectionQueueTest, InitiallyEmpty) {
+TEST_F(ConnectionMockQueueTest, InitiallyEmpty) {
     ConnectionQueue queue;
 
     EXPECT_TRUE(queue.Empty());
     EXPECT_EQ(queue.Size(), 0);
 }
 
-TEST_F(ConnectionQueueTest, PushIncreasesSize) {
+TEST_F(ConnectionMockQueueTest, PushIncreasesSize) {
     ConnectionQueue queue;
-    sockaddr_in addr;
-
-    Connection::Ptr connection(
-            new Connection(0, addr));
+    ConnectionPtr connection(new ConnectionMock({}));
 
     queue.PushBack(connection);
 
@@ -27,12 +27,9 @@ TEST_F(ConnectionQueueTest, PushIncreasesSize) {
     EXPECT_FALSE(queue.Empty());
 }
 
-TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
+TEST_F(ConnectionMockQueueTest, PushPopMakesEmpty) {
     ConnectionQueue queue;
-    sockaddr_in addr;
-
-    Connection::Ptr connection(
-            new Connection(0, addr));
+    ConnectionPtr connection(new ConnectionMock({}));
 
     queue.PushBack(connection);
     queue.PopFront();
@@ -41,14 +38,13 @@ TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
     EXPECT_TRUE(queue.Empty());
 }
 
-TEST_F(ConnectionQueueTest, PushPopTwiceReturnsCorrectElement) {
+TEST_F(ConnectionMockQueueTest, PushPopTwiceReturnsCorrectElement) {
     ConnectionQueue queue;
-    sockaddr_in addr;
 
-    Connection* connection = new Connection(0, addr);
-    Connection* connection2 = new Connection(1, addr);
-    Connection::Ptr connectionPtr(connection);
-    Connection::Ptr connectionPtr2(connection2);
+    ConnectionMock* connection = new ConnectionMock({});
+    ConnectionMock* connection2 = new ConnectionMock({});
+    ConnectionPtr connectionPtr(connection);
+    ConnectionPtr connectionPtr2(connection2);
 
     queue.PushBack(connectionPtr);
     queue.PushBack(connectionPtr2);

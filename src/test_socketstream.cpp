@@ -6,11 +6,9 @@
 #include <string.h>
 
 #include "socketstreambuffer.hpp"
-#include "connection.hpp"
 #include "connection_mock.hpp"
 
-constexpr size_t buffer_size = SocketStreamBuffer<Connection>::BufferSize;
-using ConnectionMock = Mock::Connection<buffer_size>;
+constexpr size_t buffer_size = SocketStreamBuffer::BufferSize;
 using SocketStreamTest = ::testing::Test;
 
 TEST_F(SocketStreamTest, ReadLineReadilyAvailable) {
@@ -64,7 +62,7 @@ TEST_F(SocketStreamTest, ReadFullLineInParts) {
     memset(readBuffer, 0, sizeof(readBuffer));
 
     char const (*buffer)[read_buffer_size] = reinterpret_cast<decltype(buffer)>(&data);
-    Mock::Connection<read_buffer_size> connection({
+    ConnectionMock connection({
             buffer[0], buffer[1], buffer[2], buffer[3], buffer[4] });
     SocketStreamBuffer sbuf(connection);
     std::istream stream(&sbuf);

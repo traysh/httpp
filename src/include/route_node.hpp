@@ -11,7 +11,7 @@
 #include "util_string.hpp"
 #include "route_node_lookup_result.hpp"
 
-template<class ControllerType = Controller<Connection>>
+
 class RouteNode {
     using Endpoint = HTTP::Request::Endpoint;
     using MethodType = HTTP::Request::MethodType;
@@ -22,7 +22,7 @@ public:
 
     bool Empty() { return _children.empty();  }
 
-    void Add(const Endpoint& endpoint, const ControllerType& controller) {
+    void Add(const Endpoint& endpoint, const Controller& controller) {
         const auto& clean_path = Util::String::RemoveLeadingOrTrailing(endpoint.Path, '/');
         if (clean_path.empty()) {
             const auto& [_, emplaced] = _controllers.emplace(endpoint.Method, controller);
@@ -43,14 +43,14 @@ public:
         node_it->second.Add(Endpoint{unprocessed, endpoint.Method}, controller);
     }
 
-    inline RouteNodeLookupResponse<ControllerType> Get(const Endpoint& endpoint) const {
-        using ParametersType = typename RouteNodeLookupResponse<ControllerType>::ParametersType;
+    inline RouteNodeLookupResponse Get(const Endpoint& endpoint) const {
+        using ParametersType = typename RouteNodeLookupResponse::ParametersType;
 
         const auto& clean_path = Util::String::RemoveLeadingOrTrailing(endpoint.Path, '/');
         if (clean_path.empty()) {
             auto it = _controllers.find(endpoint.Method);
             if (it == _controllers.end()) return {};
-            return { it->second, ParametersType() };
+            return { &it->second, ParametersType() };
         }
 
         const auto [child_path, unprocessed] = Util::String::Split(clean_path, "/");
@@ -62,7 +62,7 @@ public:
         if (auto it = _children.find(":"); it != _children.end()) {
             auto [controller, parameters] = it->second.Get(Endpoint{unprocessed, endpoint.Method});
             parameters[_childParameterName] = child_path;
-            return {controller, parameters};
+            return {controller, std::move(parameters)};
         }
 
         return {};
@@ -70,7 +70,7 @@ public:
 
 private:
     std::map<const std::string, RouteNode> _children;
-    std::map<MethodType, ControllerType> _controllers;
+    std::map<MethodType, Controller> _controllers;
     std::string _childParameterName;
 };
 

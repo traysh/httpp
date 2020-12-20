@@ -4,11 +4,11 @@ project (httpp)
 set (httpp_VERSION_MAJOR 0)
 set (httpp_VERSION_MINOR 1)
 
-set(CMAKE_CXX_STANDARD 17)
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fexceptions -Wfatal-errors")
-
 find_package (Threads)
 
 # For use by YouCompleteMe
@@ -55,6 +55,8 @@ set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE" PROPERTIES OUTPUT_NAME ${C
 target_link_libraries("${CMAKE_PROJECT_NAME}_EXAMPLE" "${CMAKE_PROJECT_NAME}_SHARED")
 
 add_custom_target(examples DEPENDS ${CMAKE_PROJECT_NAME}_EXAMPLE)
+target_compile_options("${CMAKE_PROJECT_NAME}_EXAMPLE" PRIVATE -Og -ggdb3)
+target_link_options("${CMAKE_PROJECT_NAME}_EXAMPLE" PRIVATE -ggdb3)
 
 ################################
 # GTest
@@ -64,7 +66,7 @@ add_subdirectory (googletest EXCLUDE_FROM_ALL)
 mark_as_advanced(BUILD_GMOCK)
 
 # Unit Tests
-file(GLOB_RECURSE tests CONFIGURE_DEPENDS "src/test_*.cpp")
+file(GLOB_RECURSE tests CONFIGURE_DEPENDS "test/*.{h,c}pp" "src/test_*.cpp")
 add_executable(unit EXCLUDE_FROM_ALL ${tests} ${sources} ${includes})
 
 # Link test executable against gtest & gtest_main
@@ -96,7 +98,7 @@ add_custom_target(test-unit
 add_custom_target(test-debug
                   COMMAND find ${PROJECT_BINARY_DIR} -name '*.gcda'
                                                      -exec rm {} +
-                  COMMAND lldb ./unit
+                  COMMAND lldb "${PROJECT_BINARY_DIR}/unit"
                   DEPENDS unit)
 
 

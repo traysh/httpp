@@ -8,7 +8,7 @@ using RequestParserTest = ::testing::Test;
 
 namespace {
 TEST_F(RequestParserTest, WellFormattedRequestLine) {
-    Mock::Connection connection({"GET / HTTP/1.1\r\n\r\n"});
+    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -23,7 +23,7 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
 }
 
 TEST_F(RequestParserTest, SlowClientRequestLine) {
-    Mock::Connection connection({"GE"});
+    ConnectionMock connection({"GE"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -39,7 +39,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
 }
 
 TEST_F(RequestParserTest, UnprocessableRequestLine) {
-    Mock::Connection connection({"GET\n"});
+    ConnectionMock connection({"GET\n"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -51,7 +51,7 @@ TEST_F(RequestParserTest, UnprocessableRequestLine) {
 }
 
 TEST_F(RequestParserTest, WellFormattedRequestHeader) {
-    Mock::Connection connection({
+    ConnectionMock connection({
             "GET / HTTP/1.1\r\n"
             "Host: localhost:9933\r\n"
             "User-Agent: curl/7.54.0\r\n"
@@ -82,7 +82,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
 }
 
 TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
-    Mock::Connection connection({
+    ConnectionMock connection({
             "GET / HTTP/1.1\r\n"
             "Host: localhost:9933\r\n"
             "User-Agent: cur",
@@ -120,7 +120,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
 }
 
 TEST_F(RequestParserTest, WellFormattedPost) {
-    Mock::Connection connection({
+    ConnectionMock connection({
         "POST / HTTP/1.1\r\n"
         "Host: localhost:9933\r\n"
         "User-Agent: curl/7.54.0\r\n"
@@ -158,7 +158,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
 
 
 TEST_F(RequestParserTest, NoCarriageReturnPost) {
-    Mock::Connection connection({
+    ConnectionMock connection({
         "POST / HTTP/1.1\n"
         "Host: localhost:9933\n"
         "User-Agent: curl/7.54.0\n"

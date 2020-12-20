@@ -1,3 +1,4 @@
+#include "httprequest.hpp"
 #include "server.hpp"
 
 int main() {
@@ -21,7 +22,28 @@ int main() {
             [](const auto& request, auto& response) {
                 response << request.Body.CStr();
         }},
-    });
+        { "/echo/:param", Method::Post,
+            [](const auto& request, auto& response) {
+                for (const auto& [key, value] : request.parameters) {
+                    response << key << ": " << value << "\n";
+                }
+                response << request.Body.CStr() << "\n";
+        }},
+        { "/echo/:param/inner", Method::Post,
+            [](const auto& request, auto& response) {
+                for (const auto& [key, value] : request.parameters) {
+                    response << key << ": " << value << "\n";
+                }
+                response << request.Body.CStr() << " from inner\n";
+        }},
+        { "/echo/:param/inner/:inner_param", Method::Post,
+            [](const auto& request, auto& response) {
+                for (const auto& [key, value] : request.parameters) {
+                    response << key << ": " << value << "\n";
+                }
+                response << request.Body.CStr() << " from inner\n";
+        }},
+     });
     router.SetNotFoundHandler([](auto& response) {
         response.Status = HTTPResponseStatus::Type::NotFound;
         response << "sorry, I don't know that URL";

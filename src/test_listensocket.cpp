@@ -3,10 +3,10 @@
 #include <unistd.h>
 #include <memory>
 
+#include "connection.hpp"
 #include "listensocket.hpp"
 #include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"
-#include "connection.hpp"
 
 #include <map>
 
@@ -135,7 +135,7 @@ TEST_F(ListenSocketTest, AcceptSuccess) {
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    Connection::Ptr connection(socket.Accept(100));
+    auto connection(socket.Accept(100));
     EXPECT_NE(connection, nullptr);
 }
 
@@ -146,7 +146,7 @@ TEST_F(ListenSocketTest, AcceptButNoClients) {
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    Connection::Ptr connection(socket.Accept(100));
+    auto connection(socket.Accept(100));
     EXPECT_EQ(connection, nullptr);
 }
 

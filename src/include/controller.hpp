@@ -3,14 +3,12 @@
 #include <functional>
 
 #include "httprequest.hpp"
-#include "httpresponse.hpp"
+#include "http/response.hpp"
 
-template<class ConnectionType>
 class Controller {
     public:
-        using HTTPResponseType = HTTPResponse<ConnectionType>;
-        using CallableType = void(*)(const HTTPRequest&, HTTPResponseType&);
-        using NoRequestCallableType = void(*)(HTTPResponseType&);
+        using CallableType = void(*)(const HTTPRequest&, HTTP::Response&);
+        using NoRequestCallableType = void(*)(HTTP::Response&);
 
         static Controller Null() {
             return Controller();
@@ -22,28 +20,26 @@ class Controller {
                 _callable = nullptr;
             }
             else {
-                _callable = [callable](const HTTPRequest&,
-                                       HTTPResponseType& response) {
+                _callable = [callable](const HTTPRequest&, HTTP::Response& response) {
                     callable(response);
                 };
             }
         }
 
         operator bool() const {
-            return _callable != nullptr;
+            return static_cast<bool>(_callable);
         }
 
-        auto operator() (const HTTPRequest& request,
-                               HTTPResponseType& response)  const {
+        auto operator() (const HTTPRequest& request, HTTP::Response& response)  const {
             return _callable(request, response);
         }
 
     private:
         using WrappedCallable = std::function<void(const HTTPRequest&,
-                                                   HTTPResponseType&)>;
+                                                   HTTP::Response&)>;
         std::function<void(const HTTPRequest&,
-                           HTTPResponse<ConnectionType>&)> _callable;
+                           HTTP::Response&)> _callable;
 
-        Controller() : _callable(nullptr) {}
+        Controller() : _callable() {}
 };
 

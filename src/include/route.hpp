@@ -1,32 +1,32 @@
 #pragma once
 
+#include <string>
+
 #include "controller.hpp"
 #include "http/request_method_type.hpp"
 
-template<class ConnectionType>
 class Route {
     public:
-        using ControllerType = Controller<ConnectionType>;
         using MethodType = HTTP::Request::MethodType;
         using KeyType = std::pair<std::string, MethodType>;
 
-        using CallableType = typename ControllerType::CallableType;
-        using NoRequestCallableType = typename ControllerType::NoRequestCallableType;
+        using CallableType = typename Controller::CallableType;
+        using NoRequestCallableType = typename Controller::NoRequestCallableType;
 
         std::string Path;
         MethodType Method;
-        ControllerType Controller;
+        Controller controller;
 
         Route(const std::string& path, const MethodType& method,
-              ControllerType controller)
-            : Path(path), Method(method), Controller(controller) {}
+              Controller controller)
+            : Path(path), Method(method), controller(controller) {}
 
         Route(const std::string& path, const MethodType& method,
               CallableType callable)
-            : Path(path), Method(method), Controller({ callable }) {}
+            : Path(path), Method(method), controller(callable) {}
 
         Route(const std::string& path, const MethodType& method,
               NoRequestCallableType callable)
-            : Path(path), Method(method), Controller({ callable }) {}
+            : Path(path), Method(method), controller(callable) {}
 };
 
