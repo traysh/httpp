@@ -48,7 +48,7 @@ class Router {
         }
     }
 
-    inline Controller &NotFoundHandler() { return _notFoundController; }
+    inline const Controller &NotFoundHandler() const { return _notFoundController; }
 
     template <class Callable>
     inline void SetNotFoundHandler(Callable callable) {
@@ -71,7 +71,7 @@ class Router {
     inline const RouteRequest Get(const Endpoint &key) const {
         const auto &result = _routes.Get(key);
         if (!result.Controller) {
-            return {_notFoundController, {}};
+            return {_notFoundController, std::move(result.RouteParameters)};
         }
 
         return {*result.Controller, std::move(result.RouteParameters)};

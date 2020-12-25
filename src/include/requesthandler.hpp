@@ -37,7 +37,15 @@ class RequestHandler {
 
     inline auto Age() { return std::chrono::system_clock::now() - _createdAt; }
 
+    inline auto State() { return _state; }
+
     inline auto Step() { return _step; }
+
+    inline void GenericError() {
+        _state = StateType::Failed;
+        _response.Clear();
+        _response.Status = HTTPResponseStatus::Type::InternalServerError;
+    }
 
     inline void Timeout() {
         _state = StateType::Failed;
@@ -58,6 +66,7 @@ class RequestHandler {
                                auto result = _parser.Parse(_request);
                                if (result == Result::Failed) {
                                    _state = StateType::Failed;
+                                   _step = StepType::Finished;
                                }
 
                                if (result == Result::NoInputData) {
@@ -82,7 +91,8 @@ class RequestHandler {
              }},
             {StepType::Finished,
              [&]() {
-                 _state = StateType::Succeed;
+                 if (_state != StateType::Failed)
+                     _state = StateType::Succeed;
                  return true;
              }},
         };

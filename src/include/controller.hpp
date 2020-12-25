@@ -37,8 +37,7 @@ class Controller {
     private:
         using WrappedCallable = std::function<void(const HTTPRequest&,
                                                    HTTP::Response&)>;
-        std::function<void(const HTTPRequest&,
-                           HTTP::Response&)> _callable;
+        std::function<void(const HTTPRequest&, HTTP::Response&)> _callable;
 
         Controller() : _callable() {}
 };

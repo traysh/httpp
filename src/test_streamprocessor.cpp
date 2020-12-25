@@ -157,17 +157,17 @@ TEST_F(StreamProcessorExtractWordTest,
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {':'});
+    success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {':'});
+    success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {':'});
+    success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
     ASSERT_FALSE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
@@ -181,7 +181,7 @@ TEST_F(StreamProcessorExtractWordTest,
 
     std::string word;
 
-    auto success = processor.ExtractWord(word, false,  false, {' '}, {'r'});
+    auto success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'r'});
     ASSERT_FALSE(success == StreamProcessor::Result::Success);
 }
 
@@ -195,22 +195,22 @@ TEST_F(StreamProcessorExtractWordTest,
     std::string word;
     std::string word_ref;
 
-    auto success = processor.ExtractWord(word, false,  false, {' '}, {'a'});
+    auto success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {' '}, {'a'});
+    success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {' '}, {'a'});
+    success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
     ASSERT_TRUE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
-    success = processor.ExtractWord(word, false,  false, {' '}, {'a'});
+    success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
     ASSERT_FALSE(success == StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);

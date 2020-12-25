@@ -41,6 +41,7 @@ struct Response {
                 _connection << static_cast<std::string>(Status);
                 _connection << generateAsyncHeaders(payload);
                 _connection << payload;
+                Clear();
             }
         }
 
@@ -49,7 +50,7 @@ struct Response {
                 return false;
             }
 
-            _buffer.str("");
+            _buffer.clear();
             Status = StatusType::OK;
             return true;
         }

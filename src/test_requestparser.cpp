@@ -126,6 +126,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
         "User-Agent: curl/7.54.0\r\n"
         "Accept: */*\r\n"
         "Content-Type: application/json\r\n"
+        "Custom-Header: Type: Custom\r\n"
         "Content-Length: 13\r\n\r\n"
         "{\"foo\":\"bar\"}"
      });
@@ -150,7 +151,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
     EXPECT_EQ(request.Header.at("USER-AGENT"), "curl/7.54.0");
     ASSERT_FALSE(request.Header.find("ACCEPT") == request.Header.end());
     EXPECT_EQ(request.Header.at("ACCEPT"), "*/*");
-    EXPECT_EQ(request.Header.size(), 5);
+    EXPECT_EQ(request.Header.size(), 6);
 
     // Body
     EXPECT_STREQ(request.Body.Buffer(), "{\"foo\":\"bar\"}");

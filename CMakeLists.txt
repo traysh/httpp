@@ -48,15 +48,31 @@ target_link_libraries("${CMAKE_PROJECT_NAME}_SHARED" ${CMAKE_THREAD_LIBS_INIT})
 ################################
 # Examples
 ################################
-file(GLOB_RECURSE examples CONFIGURE_DEPENDS "examples/*/*.cpp")
 
-add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE" EXCLUDE_FROM_ALL ${examples} ${includes})
-set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE" PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
-target_link_libraries("${CMAKE_PROJECT_NAME}_EXAMPLE" "${CMAKE_PROJECT_NAME}_SHARED")
+# echo server
+file(GLOB_RECURSE example_echo CONFIGURE_DEPENDS "examples/httpp/*.cpp")
 
-add_custom_target(examples DEPENDS ${CMAKE_PROJECT_NAME}_EXAMPLE)
-target_compile_options("${CMAKE_PROJECT_NAME}_EXAMPLE" PRIVATE -Og -ggdb3)
-target_link_options("${CMAKE_PROJECT_NAME}_EXAMPLE" PRIVATE -ggdb3)
+add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" EXCLUDE_FROM_ALL ${example_echo} ${includes})
+set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}_echo")
+target_link_libraries("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" "${CMAKE_PROJECT_NAME}_STATIC")
+
+add_custom_target(example_echo DEPENDS ${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO)
+target_compile_options("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PRIVATE -Og -ggdb3)
+target_link_options("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PRIVATE -ggdb3)
+
+# index.html server
+file(GLOB_RECURSE example_server CONFIGURE_DEPENDS "examples/server/*.cpp")
+
+add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" EXCLUDE_FROM_ALL ${example_server} ${includes})
+set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}_server")
+target_link_libraries("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" "${CMAKE_PROJECT_NAME}_STATIC")
+
+add_custom_target(example_server DEPENDS ${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER)
+target_compile_options("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" PRIVATE -Og -ggdb3)
+target_link_options("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" PRIVATE -ggdb3)
+
+add_custom_target(examples)
+add_dependencies(examples example_echo example_server)
 
 ################################
 # GTest

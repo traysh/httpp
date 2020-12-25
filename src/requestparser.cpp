@@ -65,7 +65,7 @@ typename RequestParser::Result RequestParser::parseRequestLine(
             }
         }
     }
-    getline(_stream, rest);
+
     auto result = streamGood();
     if (result != Result::Success) {
         return result;
@@ -99,8 +99,7 @@ typename RequestParser::Result RequestParser::parseHeaders(HTTPRequest& request)
 
         auto initial_pos = _stream.tellg();
 
-        auto separators = processor.DefaultSeparators({':'});
-        auto result = processor.ExtractWord(key, false, true,  separators);
+        auto result = processor.ExtractWord(key, false, true, {':'});
         if (result != Result::Success) {
             if (result == Result::IncompleteInputData) {
                 result = Result::NoInputData;
@@ -110,11 +109,11 @@ typename RequestParser::Result RequestParser::parseHeaders(HTTPRequest& request)
             return result;
         }
 
-        if (_stream.get() != ':' || !_stream.good()) {
+        if (!_stream.good()) {
             return Result::Failed;
         }
 
-        result = processor.ExtractWord(value);
+        result = processor.ExtractWord(value, false, false, {'\r', '\n'});
         if (result != Result::Success) {
             if (result == Result::IncompleteInputData) {
                 result = Result::NoInputData;
@@ -123,12 +122,6 @@ typename RequestParser::Result RequestParser::parseHeaders(HTTPRequest& request)
             _stream.seekg(initial_pos);
             return result;
         }
-
-        if (!processor.NewLine()) {
-            return Result::Failed;
-        }
-
-        getline(_stream, rest);
 
         request.Header.insert_or_assign(key, value);
     }

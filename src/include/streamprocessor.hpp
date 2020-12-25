@@ -4,6 +4,7 @@
 #include <istream>
 #include <set>
 #include <sstream>
+#include <string_view>
 
 class StreamProcessor {
 public:
@@ -32,7 +33,7 @@ public:
         return NewLine(_stream);
     }
 
-    inline static std::set<char> DefaultSeparators(std::set<char> extra = {}) {
+    inline static std::set<char> Spaces(std::set<char> extra = {}) {
         static const std::set<char> separators = { ' ', '\t',  };
         extra.insert(separators.begin(), separators.end());
         return extra;
@@ -50,19 +51,23 @@ public:
     inline Result ExtractWord(std::string& str,
                      bool multiline = false,
                      bool to_upper = false,
-                     const std::set<char>& separators = DefaultSeparators(),
-                     const std::set<char>& invalid = DefaultInvalid()) {
+                     const std::set<char>& separators = Spaces(), // FIXME
+                     const std::set<char>& skip = Spaces(), // FIXME
+                     const std::set<char>& invalid = DefaultInvalid()) { // FIXME
 
         std::stringstream ss;
         int next_char;
 
         // skip allowed leading blank chars
         for (next_char = _stream.get();
-             _stream.good() && (separators.find(next_char) != separators.end()
+             _stream.good() && (skip.find(next_char) != skip.end()
                  || (multiline && NewLine(next_char)));
              next_char = _stream.get());
             
         for (; _stream.good(); next_char = _stream.get()) {
+            if (next_char == '\r') {
+                continue;
+            }
             if (NewLine(next_char) || separators.find(next_char) != separators.end()) {
                 _stream.putback(next_char);
                 break;
@@ -85,6 +90,7 @@ public:
         }
 
         str = ss.str();
+        _stream.get();
         return Result::Success;
     }
 

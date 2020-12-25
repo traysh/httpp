@@ -78,7 +78,10 @@ void Server::handleRequests() {
                 }
             }
 
-            if (handler.Step() != decltype(handler)::StepType::Finished) {
+            if (handler.State() == RequestHandler::StateType::Failed) {
+                handler.GenericError();
+            }
+            else if (handler.Step() != decltype(handler)::StepType::Finished) {
                 handler.Timeout();
             }
         });
