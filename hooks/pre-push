@@ -10,11 +10,10 @@ if [ -f "${PROJECT_DIR}/.coveralls.yml" ]; then
     cd "${PROJECT_DIR}"
 
     echo "Running tests..."
-    mkdir -p build && cd build
-    cmake .. && make -j9 test
+    mkdir -p build
+    cmake --build ./build -t test
 
     echo "Uploading coverage report..."
-    cd "${PROJECT_DIR}"
     if ! coveralls -i src -E .*/test.* -E .*_prod\..* \
               --gcov "${GCOV}"                   \
               --gcov-options '\-lp' > /dev/null &> /dev/null
