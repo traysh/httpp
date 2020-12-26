@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "connection/connection_mock.hpp"
-#include "connection_queue.hpp"
+#include "server/connection_queue.hpp"
 
 using ConnectionPtr = std::unique_ptr<Connection::Connection>;
 using ConnectionQueueTest = ::testing::Test;
@@ -11,14 +11,14 @@ using ConnectionQueueTest = ::testing::Test;
 namespace {
 
 TEST_F(ConnectionQueueTest, InitiallyEmpty) {
-    ConnectionQueue queue;
+    Server::ConnectionQueue queue;
 
     EXPECT_TRUE(queue.Empty());
     EXPECT_EQ(queue.Size(), 0);
 }
 
 TEST_F(ConnectionQueueTest, PushIncreasesSize) {
-    ConnectionQueue queue;
+    Server::ConnectionQueue queue;
     ConnectionPtr connection(new Connection::ConnectionMock({}));
 
     queue.PushBack(connection);
@@ -28,7 +28,7 @@ TEST_F(ConnectionQueueTest, PushIncreasesSize) {
 }
 
 TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
-    ConnectionQueue queue;
+    Server::ConnectionQueue queue;
     ConnectionPtr connection(new Connection::ConnectionMock({}));
 
     queue.PushBack(connection);
@@ -39,7 +39,7 @@ TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
 }
 
 TEST_F(ConnectionQueueTest, PushPopTwiceReturnsCorrectElement) {
-    ConnectionQueue queue;
+    Server::ConnectionQueue queue;
 
     Connection::ConnectionMock* connection = new Connection::ConnectionMock({});
     Connection::ConnectionMock* connection2 = new Connection::ConnectionMock({});

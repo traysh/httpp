@@ -6,6 +6,7 @@
 #include "listensocket.hpp"
 #include "router.hpp"
 
+namespace Server {
 class Server {
 public:
     inline void Serve(const unsigned short& port) {
@@ -29,3 +30,4 @@ private:
     ConnectionQueue _queue;
     Router _router;
 };
+}

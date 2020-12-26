@@ -4,7 +4,7 @@
 #include "http/request.hpp"
 #include "http/response.hpp"
 #include "requesthandler.hpp"
-#include "requestparser.hpp"
+#include "http/requestparser.hpp"
 #include "socketstreambuffer.hpp"
 
 #include <string.h>
@@ -15,6 +15,7 @@
 #include <chrono>
 #include <thread>
 
+namespace Server {
 void Server::SetReuseAddress(const bool& reuseAddress) {
     _socket.SetReuseAddress(reuseAddress);
 }
@@ -87,4 +88,4 @@ void Server::handleRequests() {
         });
     }
 }
-
+}

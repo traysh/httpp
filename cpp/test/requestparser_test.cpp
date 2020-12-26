@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "requestparser.hpp"
+#include "http/requestparser.hpp"
 #include "connection/connection_mock.hpp"
 #include "socketstreambuffer.hpp"
 
@@ -10,7 +10,7 @@ namespace {
 TEST_F(RequestParserTest, WellFormattedRequestLine) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -18,14 +18,14 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
     EXPECT_EQ(result,  decltype(parser)::Result::Success);
     EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, Server::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 }
 
 TEST_F(RequestParserTest, SlowClientRequestLine) {
     Connection::ConnectionMock connection({"GE"});
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -41,7 +41,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
 TEST_F(RequestParserTest, UnprocessableRequestLine) {
     Connection::ConnectionMock connection({"GET\n"});
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -58,7 +58,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
             "Accept: */*\r\n\r\n"
     });
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -68,7 +68,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
     // Status line
     EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, Server::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -88,7 +88,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
             "User-Agent: cur",
     });
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -106,7 +106,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
     // Status line
     EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, Server::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -131,7 +131,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
         "{\"foo\":\"bar\"}"
      });
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -141,7 +141,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
     // Status line
     EXPECT_EQ(request.Method, HTTP::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, Server::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -169,7 +169,7 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
         "{\"foo\":\"bar\"}"
      });
     SocketStreamBuffer buffer(connection);
-    RequestParser parser(buffer);
+    HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
     auto result = parser.Parse(request);
@@ -179,7 +179,7 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
     // Status line
     EXPECT_EQ(request.Method, HTTP::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, Server::ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers

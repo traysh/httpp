@@ -1,6 +1,7 @@
-#include "connection_queue.hpp"
+#include "server/connection_queue.hpp"
 #include "connection/connection.hpp"
 
+namespace Server {
 ConnectionQueue::ConnectionQueue() {}
 
 void ConnectionQueue::PushBack(ConnectionQueue::ConnectionPtr& connection) {
@@ -16,4 +17,5 @@ const ConnectionQueue::ConnectionPtr ConnectionQueue::PopFront() {
     _queue.pop_front();
 
     return connection;
+}
 }

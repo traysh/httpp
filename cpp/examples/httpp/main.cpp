@@ -1,10 +1,10 @@
 #include "http/request.hpp"
-#include "server.hpp"
+#include "server/server.hpp"
 
 int main() {
     const unsigned short port = 9933;
 
-    Server server;
+    Server::Server server;
     server.SetReuseAddress();
 
     auto& router = server.GetRouter();

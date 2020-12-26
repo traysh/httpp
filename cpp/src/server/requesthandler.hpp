@@ -6,10 +6,11 @@
 #include <thread>
 
 #include "http/request.hpp"
-#include "requestparser.hpp"
+#include "http/requestparser.hpp"
 #include "router.hpp"
 #include "socketstreambuffer.hpp"
 
+namespace Server {
 class RequestHandler {
    public:
     enum class StepType {
@@ -60,7 +61,7 @@ class RequestHandler {
         std::array<std::pair<StepType, _Processor>, 4> steps = {
             std::make_pair(StepType::Parse,
                            [&]() {
-                               using Result = typename RequestParser::Result;
+                               using Result = typename HTTP::RequestParser::Result;
 
                                auto result = _parser.Parse(_request);
                                if (result == Result::Failed) {
@@ -133,10 +134,11 @@ class RequestHandler {
     StepType _step = StepType::Parse;
     StateType _state = StateType::NotProcessed;
     SocketStreamBuffer _buffer;
-    RequestParser _parser;
+    HTTP::RequestParser _parser;
     Router& _router;
     HTTP::Request _request;
     HTTP::Response _response;
     std::chrono::system_clock::time_point _createdAt;
 };
+}
 

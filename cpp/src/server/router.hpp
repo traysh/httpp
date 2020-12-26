@@ -12,6 +12,7 @@
 #include "route/node_lookup_result.hpp"
 #include "route/request.hpp"
 
+namespace Server {
 class Router {
     using MethodType = HTTP::MethodType;
     using Endpoint = HTTP::Endpoint;
@@ -81,3 +82,4 @@ class Router {
     Controller _notFoundController;
     Controller _internalErrorController;
 };
+}

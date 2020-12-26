@@ -2,9 +2,10 @@
 
 #include <string>
 
-#include "controller.hpp"
+#include "server/controller.hpp"
 #include "http/method_type.hpp"
 
+namespace Server {
 namespace Route {
 class Route {
     public:
@@ -30,4 +31,5 @@ class Route {
               NoRequestCallableType callable)
             : Path(path), Method(method), controller(callable) {}
 };
+}
 }

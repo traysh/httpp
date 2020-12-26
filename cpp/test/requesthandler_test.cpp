@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 
 #include "connection/connection_mock.hpp"
-#include "requesthandler.hpp"
+#include "server/requesthandler.hpp"
 
 using RequestHandlerTest = ::testing::Test;
-using State = RequestHandler::StateType;
+using State = Server::RequestHandler::StateType;
 
 TEST_F(RequestHandlerTest, HandleSimpleGetRequest) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::Succeed);
@@ -17,8 +17,8 @@ TEST_F(RequestHandlerTest, HandleSimpleGetRequest) {
 
 TEST_F(RequestHandlerTest, HandleSimpleGetRequestTwice) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::Succeed);
@@ -29,8 +29,8 @@ TEST_F(RequestHandlerTest, HandleSimpleGetRequestTwice) {
 
 TEST_F(RequestHandlerTest, HandleNonSenseRequestFail) {
     Connection::ConnectionMock connection({"blahshe asdasd\r\n\r\n"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::Failed);
@@ -38,8 +38,8 @@ TEST_F(RequestHandlerTest, HandleNonSenseRequestFail) {
 
 TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
     Connection::ConnectionMock connection({"GET / HT"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::WaitingForData);
@@ -51,8 +51,8 @@ TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
 
 TEST_F(RequestHandlerTest, HandleSimpleReallySlowGetRequest) {
     Connection::ConnectionMock connection({"GET / HT"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::WaitingForData);
@@ -70,8 +70,8 @@ TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
     Connection::ConnectionMock connection(
         {"GET / HTTP/1.1\r\n"
          "Header: Tr"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     auto state = handler.Process();
     EXPECT_EQ(state, State::WaitingForData);
@@ -83,8 +83,8 @@ TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
 
 TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     router.Add("/", HTTP::MethodType::Get, [](auto&) {
         throw std::exception(); 
@@ -101,8 +101,8 @@ TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
 
 TEST_F(RequestHandlerTest, CustomHandleGetRequestUncaughtException) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    Router router;
-    RequestHandler handler(connection, router);
+    Server::Router router;
+    Server::RequestHandler handler(connection, router);
 
     router.SetInternalServerErrorHandler([](auto& response) {
         response.Status = 200;

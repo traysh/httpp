@@ -4,7 +4,7 @@
 #include <map>
 
 #include "method_type.hpp"
-#include "protocol.hpp"
+#include "server/protocol.hpp"
 #include "requestpayload.hpp"
 
 namespace HTTP {
@@ -14,7 +14,7 @@ struct Request {
 
     HTTP::MethodType Method;
     std::string Path;
-    ProtocolType Protocol;
+    Server::ProtocolType Protocol;
     std::string ProtocolVersion;
     HeadersType Header;
     RequestPayload Body;

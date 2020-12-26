@@ -16,6 +16,7 @@
 #include "streamprocessor.hpp"
 #include "util/string.hpp"
 
+namespace HTTP {
 class RequestParser {
     using _ParseStep = StreamProcessor::Result(RequestParser::*)(HTTP::Request&);
     using _Iterator = typename std::list<_ParseStep>::const_iterator;
@@ -40,7 +41,7 @@ private:
 
     inline Result streamGood();
 
-    ProtocolType mapProtocol(const std::string& str);
+    Server::ProtocolType mapProtocol(const std::string& str);
     HTTP::MethodType mapMethod(const std::string& str);
 };
-
+}

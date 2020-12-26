@@ -5,6 +5,7 @@
 #include "http/request.hpp"
 #include "http/response.hpp"
 
+namespace Server {
 class Controller {
     public:
         using CallableType = void(*)(const HTTP::Request&, HTTP::Response&);
@@ -41,4 +42,4 @@ class Controller {
 
         Controller() : _callable() {}
 };
-
+}

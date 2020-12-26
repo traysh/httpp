@@ -4,7 +4,7 @@
 
 #include "connection/connection_mock.hpp"
 #include "http/request.hpp"
-#include "router.hpp"
+#include "server/router.hpp"
 
 using RouterTest = ::testing::Test;
 using MethodType = HTTP::MethodType;
@@ -26,7 +26,7 @@ auto testControllerNoRequest = [](auto&) {
 TEST_F(RouterTest, GetDefaultNotFoundRoute) {
     Connection::ConnectionMock connection({});
     HTTP::Response response(connection);
-    Router router;
+    Server::Router router;
 
     auto callTest = router.Get({"/test", MethodType::Get}).controller;
     callTest(request, response);
@@ -41,7 +41,7 @@ TEST_F(RouterTest, GetDefaultNotFoundRoute) {
 TEST_F(RouterTest, GetCustomNotFoundRoute) {
     Connection::ConnectionMock connection({});
     HTTP::Response response(connection);
-    Router router;
+    Server::Router router;
 
     router.SetNotFoundHandler([](HTTP::Response& response) {
         response.Status = HTTP::ResponseStatus::Type::NotFound;
@@ -59,16 +59,16 @@ TEST_F(RouterTest, GetCustomNotFoundRoute) {
 }
 
 TEST_F(RouterTest, NullNoRequestCallable) {
-    Router router;
+    Server::Router router;
 
-    Controller::NoRequestCallableType callable = nullptr;
+    Server::Controller::NoRequestCallableType callable = nullptr;
     router.Add("/testNoRequest", MethodType::Get, callable);
     auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get}).controller;
     EXPECT_FALSE(callNoRequestTest); 
 }
 
 TEST_F(RouterTest, CallsAddRouteAndGet) {
-    Router router;
+    Server::Router router;
 
     router.Add("/test", MethodType::Get, testController);
     auto callTest = router.Get({"/test", MethodType::Get}).controller;
@@ -86,14 +86,14 @@ TEST_F(RouterTest, CallsAddRouteAndGet) {
 }
 
 TEST_F(RouterTest, CallsAddRouteWithTupleAndGet) {
-    Router router;
+    Server::Router router;
 
-    Route::Route route({"/test", MethodType::Get, testController});
+    Server::Route::Route route({"/test", MethodType::Get, testController});
     router.Add(route);
     auto callTest = router.Get({"/test", MethodType::Get}).controller;
     EXPECT_THROW(callTest(request, response), TestControllerException); 
 
-    Route::Route routeNoController({"/testNoRequest", MethodType::Get, testControllerNoRequest});
+    Server::Route::Route routeNoController({"/testNoRequest", MethodType::Get, testControllerNoRequest});
     router.Add(routeNoController);
     auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get}).controller;
     EXPECT_THROW(callNoRequestTest(request, response),
@@ -102,7 +102,7 @@ TEST_F(RouterTest, CallsAddRouteWithTupleAndGet) {
 }
 
 TEST_F(RouterTest, CallsAddWithMultipleRoutesAndGet) {
-    Router router;
+    Server::Router router;
     router.Add({
         {"/test", MethodType::Get, testController},
         {"/testNoRequest", MethodType::Get, testControllerNoRequest}

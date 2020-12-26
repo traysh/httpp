@@ -9,6 +9,7 @@ namespace Connection {
 class Connection;
 }
 
+namespace Server {
 class ConnectionQueue {
     using ConnectionPtr = std::unique_ptr<Connection::Connection>;
 
@@ -26,3 +27,4 @@ private:
     Queue _queue;
     std::mutex _m;
 };
+}

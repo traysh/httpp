@@ -1,5 +1,6 @@
-#include "requestparser.hpp"
+#include "http/requestparser.hpp"
 
+namespace HTTP {
 RequestParser::Result RequestParser::streamGood() {
     if (_stream.bad()) {
         return Result::Failed;
@@ -210,20 +211,20 @@ HTTP::MethodType RequestParser::mapMethod(const std::string& str) {
     return type;
 }
 
-ProtocolType RequestParser::mapProtocol(const std::string& str) {
-    const static std::map<std::string, ProtocolType> m {
-        { "HTTP", ProtocolType::HTTP },
+Server::ProtocolType RequestParser::mapProtocol(const std::string& str) {
+    const static std::map<std::string, Server::ProtocolType> m {
+        { "HTTP", Server::ProtocolType::HTTP },
     };
 
-    ProtocolType type;
+    Server::ProtocolType type;
     try {
         type = m.at(str);
     }
     catch (const std::out_of_range& e) {
-        return ProtocolType::Unknown;
+        return Server::ProtocolType::Unknown;
     }
 
     return type;
 }
-
+}
 

@@ -4,7 +4,8 @@
 #include <map>
 #include <string>
 
-#include "controller.hpp"
+namespace Server {
+class Controller;
 
 namespace Route {
 struct NodeLookupResponse {
@@ -12,6 +13,8 @@ struct NodeLookupResponse {
     const Controller* Controller;
     ParametersType RouteParameters;
 };
+}
+
 }
 
 #endif // ROUTE_NODE_LOOKUP_RESULT

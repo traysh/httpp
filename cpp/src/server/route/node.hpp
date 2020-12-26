@@ -5,12 +5,13 @@
 #include <stdexcept>
 #include <string>
 
-#include "controller.hpp"
+#include "server/controller.hpp"
 #include "http/endpoint.hpp"
 #include "util/string.hpp"
 #include "node_lookup_result.hpp"
 
 
+namespace Server {
 namespace Route {
 class Node {
     using Endpoint = HTTP::Endpoint;
@@ -73,6 +74,7 @@ private:
     std::map<MethodType, Controller> _controllers;
     std::string _childParameterName;
 };
+}
 }
 
 #endif // ROUTE_NODE_HPP

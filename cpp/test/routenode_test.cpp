@@ -3,17 +3,17 @@
 #include "connection/connection_mock.hpp"
 #include "http/endpoint.hpp"
 #include "http/method_type.hpp"
-#include "route/node.hpp"
+#include "server/route/node.hpp"
 
 namespace {
 
 TEST(RouteNodeTest, InitiallyEmpty) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 }
 
 TEST(RouteNodeTest, GetEmptyReturnsFalseForController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const HTTP::Endpoint endpoint{"/", HTTP::MethodType::Get};
@@ -24,10 +24,10 @@ TEST(RouteNodeTest, GetEmptyReturnsFalseForController) {
 }
 
 TEST(RouteNodeTest, AddOneController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     const HTTP::Endpoint endpoint{"/", HTTP::MethodType::Get};
 
     node.Add(endpoint, controller);
@@ -37,10 +37,10 @@ TEST(RouteNodeTest, AddOneController) {
 }
 
 TEST(RouteNodeTest, AddOneChildWithOneController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     HTTP::Endpoint endpoint{"/child", HTTP::MethodType::Get};
 
     node.Add(endpoint, controller);
@@ -55,10 +55,10 @@ TEST(RouteNodeTest, AddOneChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOne2ndLevelChildWithOneController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     HTTP::Endpoint endpoint{"/child/inner", HTTP::MethodType::Get};
 
     node.Add(endpoint, controller);
@@ -73,10 +73,10 @@ TEST(RouteNodeTest, AddOne2ndLevelChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOneChildWithTwoControllers) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     HTTP::Endpoint endpoint{"/child", HTTP::MethodType::Get};
     HTTP::Endpoint other_endpoint{"/child", HTTP::MethodType::Post};
 
@@ -93,10 +93,10 @@ TEST(RouteNodeTest, AddOneChildWithTwoControllers) {
 }
 
 TEST(RouteNodeTest, AddTwoChildrenWithOneControllerEach) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     HTTP::Endpoint endpoint{"/child", HTTP::MethodType::Get};
     HTTP::Endpoint other_endpoint{"/other_child", HTTP::MethodType::Post};
 
@@ -113,10 +113,10 @@ TEST(RouteNodeTest, AddTwoChildrenWithOneControllerEach) {
 }
 
 TEST(RouteNodeTest, AddOneParameterizedChildWithOneController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     const HTTP::Endpoint endpoint{"/:child", HTTP::MethodType::Get};
     node.Add(endpoint, controller);
 
@@ -133,10 +133,10 @@ TEST(RouteNodeTest, AddOneParameterizedChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOneParameterizedChildWithOne2ndLevelController) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     const HTTP::Endpoint endpoint{"/:child/action", HTTP::MethodType::Get};
     node.Add(endpoint, controller);
 
@@ -159,10 +159,10 @@ TEST(RouteNodeTest, AddOneParameterizedChildWithOne2ndLevelController) {
 }
 
 TEST(RouteNodeTest, AddNestedParameterizedChildren) {
-    Route::Node node;
+    Server::Route::Node node;
     EXPECT_TRUE(node.Empty());
 
-    const auto& controller = Controller::Null();
+    const auto& controller = Server::Controller::Null();
     const HTTP::Endpoint endpoint{"/:child/:feature/action", HTTP::MethodType::Get};
     node.Add(endpoint, controller);
 
