@@ -2,14 +2,14 @@
 
 #include "http/requestparser.hpp"
 #include "connection/connection_mock.hpp"
-#include "socketstreambuffer.hpp"
+#include "connection/streambuffer.hpp"
 
 using RequestParserTest = ::testing::Test;
 
 namespace {
 TEST_F(RequestParserTest, WellFormattedRequestLine) {
     Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -24,7 +24,7 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
 
 TEST_F(RequestParserTest, SlowClientRequestLine) {
     Connection::ConnectionMock connection({"GE"});
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -40,7 +40,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
 
 TEST_F(RequestParserTest, UnprocessableRequestLine) {
     Connection::ConnectionMock connection({"GET\n"});
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -57,7 +57,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
             "User-Agent: curl/7.54.0\r\n"
             "Accept: */*\r\n\r\n"
     });
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -87,7 +87,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
             "Host: localhost:9933\r\n"
             "User-Agent: cur",
     });
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -130,7 +130,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
         "Content-Length: 13\r\n\r\n"
         "{\"foo\":\"bar\"}"
      });
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;
@@ -168,7 +168,7 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
         "Content-Length: 13\n\n"
         "{\"foo\":\"bar\"}"
      });
-    SocketStreamBuffer buffer(connection);
+    Connection::StreamBuffer buffer(connection);
     HTTP::RequestParser parser(buffer);
 
     HTTP::Request request;

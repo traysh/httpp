@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 using namespace std;
-using ErrorType = SocketErrorType;
 
+namespace Socket {
 ListenSocket::ListenSocket() : _fd(socket(AF_INET, SOCK_STREAM, 0))
 {
 	memset(&_listenAddress, 0, sizeof(_listenAddress));
@@ -33,12 +33,12 @@ namespace {
 
 void ListenSocket::SetReuseAddress(bool reuseAddress) {
     if (_ready) {
-        throw SocketError<ErrorType::AlreadyInitialized>();
+        throw Error<ErrorType::AlreadyInitialized>();
     }
 
     int enable = reuseAddress ? 1 : 0;
     if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        throw SocketError<ErrorType::SetReuseAddressError>();
+        throw Error<ErrorType::SetReuseAddressError>();
     }
 
 void ListenSocket::Listen(const char* address,
@@ -46,7 +46,7 @@ void ListenSocket::Listen(const char* address,
                           const int max_backlog)
 {
     if (_ready) {
-        throw SocketError<ErrorType::AlreadyInitialized>();
+        throw Error<ErrorType::AlreadyInitialized>();
     }
 
     char sane_address[address_length];
@@ -55,7 +55,7 @@ void ListenSocket::Listen(const char* address,
 
     struct in_addr addr;
     if (int ret = inet_aton(sane_address, &addr) == 0) {
-        throw SocketError<ErrorType::ConvertAddress>(ret);
+        throw Error<ErrorType::ConvertAddress>(ret);
     }
 
 	_listenAddress.sin_family = AF_INET;
@@ -64,11 +64,11 @@ void ListenSocket::Listen(const char* address,
 
     if (int ret = ::bind(_fd, (struct sockaddr*)&_listenAddress,
                sizeof(_listenAddress)) != 0) {
-        throw SocketError<ErrorType::BindError>(ret);
+        throw Error<ErrorType::BindError>(ret);
     }
     
     if (int ret = mockable::listen(_fd, max_backlog) != 0) {
-        throw SocketError<ErrorType::ListenError>(ret);
+        throw Error<ErrorType::ListenError>(ret);
     }
 
     _ready = true;
@@ -76,7 +76,7 @@ void ListenSocket::Listen(const char* address,
 
 ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
     if (!_ready) {
-        throw SocketError<ErrorType::Unready>();
+        throw Error<ErrorType::Unready>();
     }
 
     fd_set read_fd_set;
@@ -91,7 +91,7 @@ ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
     auto* timeout_ptr = timeout_ms != 0 ? &timeout : nullptr;
     if (mockable::select(FD_SETSIZE, &read_fd_set, nullptr, nullptr,
                          timeout_ptr) < 0) {
-        throw SocketError<ErrorType::SelectError>();
+        throw Error<ErrorType::SelectError>();
     }
     if (!FD_ISSET(_fd, &read_fd_set)) {
         return std::unique_ptr<Connection::Connection>(nullptr);
@@ -108,9 +108,9 @@ ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
 
     int result = mockable::fcntl(connfd, F_SETFL, fcntl(connfd, F_GETFL, 0) | O_NONBLOCK);
     if (result != 0) {
-        throw SocketError<ErrorType::SetNoWaitError>();
+        throw Error<ErrorType::SetNoWaitError>();
     }
 
     return std::unique_ptr<Connection::Connection>(new Connection::ConnectionImpl(connfd, connection_address));
 }
-
+}

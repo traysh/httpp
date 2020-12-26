@@ -11,8 +11,8 @@
 #include <string>
 #include <unistd.h>
 
+#include "connection/streambuffer.hpp"
 #include "http/request.hpp"
-#include "socketstreambuffer.hpp"
 #include "util/streamprocessor.hpp"
 #include "util/string.hpp"
 
@@ -24,13 +24,13 @@ class RequestParser {
 public:
     using Result = Util::StreamProcessor::Result;
 
-    RequestParser(SocketStreamBuffer& buffer, _Iterator currentStep = _parseSequence.begin()) 
+    RequestParser(Connection::StreamBuffer& buffer, _Iterator currentStep = _parseSequence.begin()) 
         : _buffer(buffer), _stream(&_buffer), _currentStep(currentStep) {}
 
     Result Parse(HTTP::Request& request);
 
 private:
-    SocketStreamBuffer& _buffer;
+    Connection::StreamBuffer& _buffer;
     std::istream _stream;
     const static std::list<_ParseStep> _parseSequence;
     _Iterator _currentStep;

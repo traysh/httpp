@@ -10,16 +10,17 @@
 
 #include "connection/connection.hpp"
 
-class SocketStreamBuffer : public std::streambuf {
+namespace Connection {
+class StreamBuffer : public std::streambuf {
 public:
     const static size_t BufferSize = 1024; // FIXME
 
-    SocketStreamBuffer(Connection::Connection& connection) : std::streambuf(), _connection(connection) {
+    StreamBuffer(Connection& connection) : std::streambuf(), _connection(connection) {
         overflow();
         setg(_buffer[0], _buffer[0], _buffer[0]);
     }
 
-    ~SocketStreamBuffer() {
+    ~StreamBuffer() {
         for (auto* buffer : _buffer) {
             delete[] buffer;
         }
@@ -208,7 +209,7 @@ protected:
     }
 
 private:
-    Connection::Connection& _connection;
+    Connection& _connection;
     std::vector<char*> _buffer;
     std::map<char*, size_t> _addressToBuffer;
     char* _validLimit = nullptr;
@@ -226,4 +227,4 @@ private:
         return _buffer[buffer_index] + BufferSize;
     }
 };
-
+}

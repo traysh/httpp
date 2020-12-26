@@ -7,6 +7,7 @@ namespace Connection {
 class Connection;
 }
 
+namespace Socket {
 class ListenSocket
 {
 public:
@@ -27,3 +28,4 @@ private:
     int _fd;
     bool _ready = false;
 };
+}

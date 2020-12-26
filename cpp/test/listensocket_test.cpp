@@ -4,14 +4,13 @@
 #include <memory>
 
 #include "connection/connection.hpp"
-#include "listensocket.hpp"
-#include "listensocketexceptions.hpp"
+#include "socket/listensocket.hpp"
+#include "socket/listensocketexceptions.hpp"
 #include "mock/listensocket_mocks.hpp"
 
 #include <map>
 
 using namespace std;
-using ErrorType = SocketErrorType;
 
 const auto sourceAddress = "0.0.0.0";
 const unsigned short port = 9933;
@@ -20,26 +19,26 @@ using ListenSocketTest = ::testing::Test;
 
 namespace {
 TEST_F(ListenSocketTest, CorrectlyInitialized) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
 }
 
 TEST_F(ListenSocketTest, ListenSuccess) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port+1));
     EXPECT_TRUE(socket.Ready());
 }
 
 TEST_F(ListenSocketTest, SetReuseAddressFailAlreadyInitialized) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port+2));
-    EXPECT_THROW(socket.SetReuseAddress(), SocketError<ErrorType::AlreadyInitialized>);
+    EXPECT_THROW(socket.SetReuseAddress(), Socket::Error<Socket::ErrorType::AlreadyInitialized>);
 }
 
 TEST_F(ListenSocketTest, SetReuseAddressSuccess) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
@@ -52,48 +51,48 @@ TEST_F(ListenSocketTest, ListenFails) {
         return 1;
     });
 
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_THROW(socket.Listen(sourceAddress, port),
-        SocketError<ErrorType::ListenError>);
+        Socket::Error<Socket::ErrorType::ListenError>);
     EXPECT_FALSE(socket.Ready());
 }
 
 TEST_F(ListenSocketTest, ListenTwiceFails) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
     EXPECT_THROW(socket.Listen(sourceAddress, port),
-                 SocketError<ErrorType::AlreadyInitialized>);
+                 Socket::Error<Socket::ErrorType::AlreadyInitialized>);
     EXPECT_TRUE(socket.Ready());
 }
 
 TEST_F(ListenSocketTest, ListenInvalidAddress) {
     const auto sourceAddress = "notaddress";
 
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_THROW(socket.Listen(sourceAddress, port),
-                 SocketError<ErrorType::ConvertAddress>);
+                 Socket::Error<Socket::ErrorType::ConvertAddress>);
     EXPECT_FALSE(socket.Ready());
 }
 
 TEST_F(ListenSocketTest, ListenAlreadyBound) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
-    ListenSocket failureSocket;
+    Socket::ListenSocket failureSocket;
     failureSocket.SetReuseAddress();
     EXPECT_THROW(failureSocket.Listen(sourceAddress, port),
-                 SocketError<ErrorType::BindError>);
+                 Socket::Error<Socket::ErrorType::BindError>);
     EXPECT_FALSE(failureSocket.Ready());
 }
 
@@ -129,7 +128,7 @@ TEST_F(ListenSocketTest, AcceptSuccess) {
 
     mockable::close.Register([](int){ return 0; });
 
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
@@ -140,7 +139,7 @@ TEST_F(ListenSocketTest, AcceptSuccess) {
 }
 
 TEST_F(ListenSocketTest, AcceptButNoClients) {
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
@@ -158,14 +157,14 @@ TEST_F(ListenSocketTest, AcceptSelectFails) {
         }
     );
 
-    ListenSocket socket;
+    Socket::ListenSocket socket;
     EXPECT_FALSE(socket.Ready());
     EXPECT_NO_THROW(socket.SetReuseAddress());
     EXPECT_NO_THROW(socket.Listen(sourceAddress, port));
     EXPECT_TRUE(socket.Ready());
 
     EXPECT_THROW(socket.Accept(100),
-        SocketError<ErrorType::SelectError>);
+        Socket::Error<Socket::ErrorType::SelectError>);
 }
 
 } // namespace

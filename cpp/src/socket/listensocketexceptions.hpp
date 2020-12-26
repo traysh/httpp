@@ -2,15 +2,16 @@
 
 #include <exception>
 
-enum class SocketErrorType {
+namespace Socket {
+enum class ErrorType {
     AlreadyInitialized, ConvertAddress, BindError, ListenError,
     SelectError, SetReuseAddressError, SetNoWaitError, Unready, 
 };
 
-template <SocketErrorType ErrorType>
-class SocketError : public std::exception {
+template <ErrorType ErrorType>
+class Error : public std::exception {
 public:
-    SocketError(int error_code = 0)
+    Error(int error_code = 0)
         : exception(), _error_code(error_code) {}
 
     virtual const char* what() const noexcept {
@@ -24,34 +25,34 @@ private:
 };
 
 template<>
-constexpr const char* SocketError<SocketErrorType::AlreadyInitialized>
+constexpr const char* Error<ErrorType::AlreadyInitialized>
     ::_message = "Socket is already initialized";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::ConvertAddress>
+constexpr const char* Error<ErrorType::ConvertAddress>
     ::_message = "Error converting IP address";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::BindError>
+constexpr const char* Error<ErrorType::BindError>
     ::_message = "Bind failed";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::ListenError>
+constexpr const char* Error<ErrorType::ListenError>
     ::_message = "Listen failed";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::SelectError>
+constexpr const char* Error<ErrorType::SelectError>
     ::_message = "Socket select failed";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::SetReuseAddressError>
+constexpr const char* Error<ErrorType::SetReuseAddressError>
     ::_message = "Failed setting to reuse address";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::SetNoWaitError>
+constexpr const char* Error<ErrorType::SetNoWaitError>
     ::_message = "Failed setting socket O_NOWAIT";
 
 template<>
-constexpr const char* SocketError<SocketErrorType::Unready>
+constexpr const char* Error<ErrorType::Unready>
     ::_message = "The socket is not ready for this operation";
-
+}

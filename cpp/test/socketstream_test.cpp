@@ -5,10 +5,10 @@
 #include <iostream>
 #include <string.h>
 
-#include "socketstreambuffer.hpp"
+#include "connection/streambuffer.hpp"
 #include "connection/connection_mock.hpp"
 
-constexpr size_t buffer_size = SocketStreamBuffer::BufferSize;
+constexpr size_t buffer_size = Connection::StreamBuffer::BufferSize;
 using SocketStreamTest = ::testing::Test;
 
 TEST_F(SocketStreamTest, ReadLineReadilyAvailable) {
@@ -20,7 +20,7 @@ TEST_F(SocketStreamTest, ReadLineReadilyAvailable) {
     memset(readBuffer, 0, sizeof(readBuffer));
 
     Connection::ConnectionMock connection({requestData.c_str()});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
     stream.getline(readBuffer, sizeof(readBuffer));
 
@@ -43,7 +43,7 @@ TEST_F(SocketStreamTest, ReadLineWithASmallBuffer) {
     memset(readBuffer, 0, sizeof(readBuffer));
 
     Connection::ConnectionMock connection({requestData.c_str()});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
     stream.getline(readBuffer, sizeof(readBuffer));
 
@@ -64,7 +64,7 @@ TEST_F(SocketStreamTest, ReadFullLineInParts) {
     char const (*buffer)[read_buffer_size] = reinterpret_cast<decltype(buffer)>(&data);
     Connection::ConnectionMock connection({
             buffer[0], buffer[1], buffer[2], buffer[3], buffer[4] });
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     std::stringstream total;
@@ -124,7 +124,7 @@ std::string SocketStreamBigLineTest::_line;
 TEST_F(SocketStreamBigLineTest, ReadLineBiggerThanBuffer) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -136,7 +136,7 @@ TEST_F(SocketStreamBigLineTest, ReadLineBiggerThanBuffer) {
 TEST_F(SocketStreamBigLineTest, SeekAbsoluteInputPosition) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -153,7 +153,7 @@ TEST_F(SocketStreamBigLineTest, SeekAbsoluteInputPosition) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromBeggining) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -170,7 +170,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromBeggining) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromCurrent) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -187,7 +187,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromCurrent) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromEnd) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -204,7 +204,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeInputPositionFromEnd) {
 TEST_F(SocketStreamBigLineTest, SeekAbsoluteOutputPosition) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -225,7 +225,7 @@ TEST_F(SocketStreamBigLineTest, SeekAbsoluteOutputPosition) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromBeggining) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.getline(_read_buffer, _read_buffer_size);
@@ -246,7 +246,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromBeggining) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromCurrent) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.readsome(_read_buffer, buffer_size);
@@ -265,7 +265,7 @@ TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromCurrent) {
 TEST_F(SocketStreamBigLineTest, SeekRelativeOutputPositionFromEnd) {
     char (*buffer)[buffer_size] = reinterpret_cast<decltype(buffer)>(_data);
     Connection::ConnectionMock connection({buffer[0], buffer[1], buffer[0]});
-    SocketStreamBuffer sbuf(connection);
+    Connection::StreamBuffer sbuf(connection);
     std::istream stream(&sbuf);
 
     stream.readsome(_read_buffer, buffer_size);

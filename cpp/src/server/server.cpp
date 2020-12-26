@@ -5,7 +5,6 @@
 #include "http/response.hpp"
 #include "requesthandler.hpp"
 #include "http/requestparser.hpp"
-#include "socketstreambuffer.hpp"
 
 #include <string.h>
 #include <istream>

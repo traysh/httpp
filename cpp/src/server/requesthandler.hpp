@@ -8,7 +8,7 @@
 #include "http/request.hpp"
 #include "http/requestparser.hpp"
 #include "router.hpp"
-#include "socketstreambuffer.hpp"
+#include "connection/streambuffer.hpp"
 
 namespace Server {
 class RequestHandler {
@@ -133,7 +133,7 @@ class RequestHandler {
 
     StepType _step = StepType::Parse;
     StateType _state = StateType::NotProcessed;
-    SocketStreamBuffer _buffer;
+    Connection::StreamBuffer _buffer;
     HTTP::RequestParser _parser;
     Router& _router;
     HTTP::Request _request;

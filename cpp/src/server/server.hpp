@@ -3,7 +3,7 @@
 #include <list>
 
 #include "connection_queue.hpp"
-#include "listensocket.hpp"
+#include "socket/listensocket.hpp"
 #include "router.hpp"
 
 namespace Server {
@@ -24,7 +24,7 @@ private:
                          const unsigned short& port);
     void handleRequests();
 
-    ListenSocket _socket;
+    Socket::ListenSocket _socket;
 
     bool _run = true;
     ConnectionQueue _queue;
