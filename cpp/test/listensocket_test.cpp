@@ -6,7 +6,7 @@
 #include "connection/connection.hpp"
 #include "listensocket.hpp"
 #include "listensocketexceptions.hpp"
-#include "listensocket_mocks.hpp"
+#include "mock/listensocket_mocks.hpp"
 
 #include <map>
 

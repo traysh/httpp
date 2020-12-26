@@ -8,7 +8,7 @@
 #include <string>
 
 #include "connection.hpp"
-#include "listensocket_mocks.hpp"
+#include "mock/listensocket_mocks.hpp"
 
 namespace Connection {
 class ConnectionImpl : public Connection {
