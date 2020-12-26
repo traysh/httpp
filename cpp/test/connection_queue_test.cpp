@@ -2,24 +2,24 @@
 #include <arpa/inet.h>
 #include <memory>
 
-#include "connection_mock.hpp"
-#include "connectionqueue.hpp"
+#include "connection/connection_mock.hpp"
+#include "connection_queue.hpp"
 
-using ConnectionPtr = std::unique_ptr<Connection>;
-using ConnectionMockQueueTest = ::testing::Test;
+using ConnectionPtr = std::unique_ptr<Connection::Connection>;
+using ConnectionQueueTest = ::testing::Test;
 
 namespace {
 
-TEST_F(ConnectionMockQueueTest, InitiallyEmpty) {
+TEST_F(ConnectionQueueTest, InitiallyEmpty) {
     ConnectionQueue queue;
 
     EXPECT_TRUE(queue.Empty());
     EXPECT_EQ(queue.Size(), 0);
 }
 
-TEST_F(ConnectionMockQueueTest, PushIncreasesSize) {
+TEST_F(ConnectionQueueTest, PushIncreasesSize) {
     ConnectionQueue queue;
-    ConnectionPtr connection(new ConnectionMock({}));
+    ConnectionPtr connection(new Connection::ConnectionMock({}));
 
     queue.PushBack(connection);
 
@@ -27,9 +27,9 @@ TEST_F(ConnectionMockQueueTest, PushIncreasesSize) {
     EXPECT_FALSE(queue.Empty());
 }
 
-TEST_F(ConnectionMockQueueTest, PushPopMakesEmpty) {
+TEST_F(ConnectionQueueTest, PushPopMakesEmpty) {
     ConnectionQueue queue;
-    ConnectionPtr connection(new ConnectionMock({}));
+    ConnectionPtr connection(new Connection::ConnectionMock({}));
 
     queue.PushBack(connection);
     queue.PopFront();
@@ -38,11 +38,11 @@ TEST_F(ConnectionMockQueueTest, PushPopMakesEmpty) {
     EXPECT_TRUE(queue.Empty());
 }
 
-TEST_F(ConnectionMockQueueTest, PushPopTwiceReturnsCorrectElement) {
+TEST_F(ConnectionQueueTest, PushPopTwiceReturnsCorrectElement) {
     ConnectionQueue queue;
 
-    ConnectionMock* connection = new ConnectionMock({});
-    ConnectionMock* connection2 = new ConnectionMock({});
+    Connection::ConnectionMock* connection = new Connection::ConnectionMock({});
+    Connection::ConnectionMock* connection2 = new Connection::ConnectionMock({});
     ConnectionPtr connectionPtr(connection);
     ConnectionPtr connectionPtr2(connection2);
 

@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <memory>
 
-#include "connection.hpp"
+#include "connection/connection.hpp"
 #include "listensocket.hpp"
 #include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"

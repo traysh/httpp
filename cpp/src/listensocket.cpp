@@ -1,8 +1,8 @@
 #include "listensocket.hpp"
 #include "listensocketexceptions.hpp"
 #include "listensocket_mocks.hpp"
-#include "connection.hpp"
-#include "connection_impl.hpp"
+#include "connection/connection.hpp"
+#include "connection/connection_impl.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -94,7 +94,7 @@ ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
         throw SocketError<ErrorType::SelectError>();
     }
     if (!FD_ISSET(_fd, &read_fd_set)) {
-        return std::unique_ptr<Connection>(nullptr);
+        return std::unique_ptr<Connection::Connection>(nullptr);
     }
 
     struct sockaddr_in connection_address;
@@ -111,6 +111,6 @@ ListenSocket::ConnectionPtr ListenSocket::Accept(const int timeout_ms) {
         throw SocketError<ErrorType::SetNoWaitError>();
     }
 
-    return std::unique_ptr<Connection>(new ConnectionImpl(connfd, connection_address));
+    return std::unique_ptr<Connection::Connection>(new Connection::ConnectionImpl(connfd, connection_address));
 }
 

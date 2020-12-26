@@ -16,8 +16,6 @@
 #include "streamprocessor.hpp"
 #include "util/string.hpp"
 
-class Connection;
-
 class RequestParser {
     using _ParseStep = StreamProcessor::Result(RequestParser::*)(HTTP::Request&);
     using _Iterator = typename std::list<_ParseStep>::const_iterator;

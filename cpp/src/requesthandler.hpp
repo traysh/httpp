@@ -26,7 +26,7 @@ class RequestHandler {
         Succeed,
     };
 
-    RequestHandler(Connection& connection, Router& router)
+    RequestHandler(Connection::Connection& connection, Router& router)
         : _buffer(connection),
           _parser(_buffer),
           _router(router),

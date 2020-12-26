@@ -3,7 +3,7 @@
 #include <map>
 #include <sstream>
 
-#include "connection.hpp"
+#include "connection/connection.hpp"
 #include "http/headerkey.hpp"
 #include "http/responsestatus.hpp"
 #include "util/string.hpp"
@@ -56,7 +56,7 @@ struct Response {
         }
 
     private:
-        Connection& _connection;
+        Connection::Connection& _connection;
         std::stringstream _buffer;
         bool _wroteHeader = false;
 

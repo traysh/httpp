@@ -1,5 +1,5 @@
-#include "connectionqueue.hpp"
-#include "connection.hpp"
+#include "connection_queue.hpp"
+#include "connection/connection.hpp"
 
 ConnectionQueue::ConnectionQueue() {}
 

@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "connection_mock.hpp"
+#include "connection/connection_mock.hpp"
 #include "requesthandler.hpp"
 
 using RequestHandlerTest = ::testing::Test;
 using State = RequestHandler::StateType;
 
 TEST_F(RequestHandlerTest, HandleSimpleGetRequest) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
+    Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -16,7 +16,7 @@ TEST_F(RequestHandlerTest, HandleSimpleGetRequest) {
 }
 
 TEST_F(RequestHandlerTest, HandleSimpleGetRequestTwice) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
+    Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -28,7 +28,7 @@ TEST_F(RequestHandlerTest, HandleSimpleGetRequestTwice) {
 }
 
 TEST_F(RequestHandlerTest, HandleNonSenseRequestFail) {
-    ConnectionMock connection({"blahshe asdasd\r\n\r\n"});
+    Connection::ConnectionMock connection({"blahshe asdasd\r\n\r\n"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -37,7 +37,7 @@ TEST_F(RequestHandlerTest, HandleNonSenseRequestFail) {
 }
 
 TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
-    ConnectionMock connection({"GET / HT"});
+    Connection::ConnectionMock connection({"GET / HT"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -50,7 +50,7 @@ TEST_F(RequestHandlerTest, HandleSimpleSlowGetRequest) {
 }
 
 TEST_F(RequestHandlerTest, HandleSimpleReallySlowGetRequest) {
-    ConnectionMock connection({"GET / HT"});
+    Connection::ConnectionMock connection({"GET / HT"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -67,7 +67,7 @@ TEST_F(RequestHandlerTest, HandleSimpleReallySlowGetRequest) {
 }
 
 TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
-    ConnectionMock connection(
+    Connection::ConnectionMock connection(
         {"GET / HTTP/1.1\r\n"
          "Header: Tr"});
     Router router;
@@ -82,7 +82,7 @@ TEST_F(RequestHandlerTest, HandleSlowGetRequest) {
 }
 
 TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
+    Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     Router router;
     RequestHandler handler(connection, router);
 
@@ -100,7 +100,7 @@ TEST_F(RequestHandlerTest, HandleGetRequestUncaughtException) {
 }
 
 TEST_F(RequestHandlerTest, CustomHandleGetRequestUncaughtException) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
+    Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     Router router;
     RequestHandler handler(connection, router);
 

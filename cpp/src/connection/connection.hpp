@@ -2,6 +2,7 @@
 
 #include <string>
 
+namespace Connection {
 class Connection {
 public:
     virtual ~Connection() {};
@@ -13,10 +14,9 @@ public:
 
 template <class T, typename = std::enable_if_t<!std::is_array<T>::value &&
                                                !std::is_pointer<T>::value> >
-
 inline Connection& operator<<(Connection& connection, const T& data) {
     std::string text = std::to_string(data);
     connection << text;
     return connection;
 }
-
+}

@@ -5,10 +5,12 @@
 #include <memory>
 #include <mutex>
 
+namespace Connection {
 class Connection;
+}
 
 class ConnectionQueue {
-    using ConnectionPtr = std::unique_ptr<Connection>;
+    using ConnectionPtr = std::unique_ptr<Connection::Connection>;
 
 public:
     ConnectionQueue();

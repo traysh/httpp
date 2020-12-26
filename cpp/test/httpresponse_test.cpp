@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "connection_mock.hpp"
+#include "connection/connection_mock.hpp"
 #include "http/response.hpp"
 
 using HTTPResponseTest = ::testing::Test;
@@ -10,21 +10,21 @@ using HTTPResponseTest = ::testing::Test;
 using StatusType = HTTP::ResponseStatus::Type;
 
 TEST_F(HTTPResponseTest, CheckOKResponseMessage) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::OK);
 
     EXPECT_STREQ(response.Status.Reason, "OK");
 }
 
 TEST_F(HTTPResponseTest, CheckNotFoundResponseMessage) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::NotFound);
 
     EXPECT_STREQ(response.Status.Reason, "Not Found");
 }
 
 TEST_F(HTTPResponseTest, CheckOKResponseConvertToString) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::OK);
 
     ASSERT_STREQ(response.Status.Reason, "OK");
@@ -36,7 +36,7 @@ TEST_F(HTTPResponseTest, CheckOKResponseConvertToString) {
 }
 
 TEST_F(HTTPResponseTest, WriteAsyncNoFlush) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::OK);
 
     response << "Test data: " << 3 << '\n';
@@ -45,7 +45,7 @@ TEST_F(HTTPResponseTest, WriteAsyncNoFlush) {
 }
 
 TEST_F(HTTPResponseTest, WriteAsyncFlush) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::OK);
 
     response << "Test data: " << 3 << '\n';
@@ -58,7 +58,7 @@ TEST_F(HTTPResponseTest, WriteAsyncFlush) {
 }
 
 TEST_F(HTTPResponseTest, WriteSync) {
-    ConnectionMock connection({""});
+    Connection::ConnectionMock connection({""});
     HTTP::Response response(connection, StatusType::OK);
 
     response.Mode = HTTP::Response::OperationMode::Sync;

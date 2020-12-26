@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
 #include "requestparser.hpp"
-#include "connection_mock.hpp"
+#include "connection/connection_mock.hpp"
 #include "socketstreambuffer.hpp"
 
 using RequestParserTest = ::testing::Test;
 
 namespace {
 TEST_F(RequestParserTest, WellFormattedRequestLine) {
-    ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
+    Connection::ConnectionMock connection({"GET / HTTP/1.1\r\n\r\n"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -23,7 +23,7 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
 }
 
 TEST_F(RequestParserTest, SlowClientRequestLine) {
-    ConnectionMock connection({"GE"});
+    Connection::ConnectionMock connection({"GE"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -39,7 +39,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
 }
 
 TEST_F(RequestParserTest, UnprocessableRequestLine) {
-    ConnectionMock connection({"GET\n"});
+    Connection::ConnectionMock connection({"GET\n"});
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
@@ -51,7 +51,7 @@ TEST_F(RequestParserTest, UnprocessableRequestLine) {
 }
 
 TEST_F(RequestParserTest, WellFormattedRequestHeader) {
-    ConnectionMock connection({
+    Connection::ConnectionMock connection({
             "GET / HTTP/1.1\r\n"
             "Host: localhost:9933\r\n"
             "User-Agent: curl/7.54.0\r\n"
@@ -82,7 +82,7 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
 }
 
 TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
-    ConnectionMock connection({
+    Connection::ConnectionMock connection({
             "GET / HTTP/1.1\r\n"
             "Host: localhost:9933\r\n"
             "User-Agent: cur",
@@ -120,7 +120,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
 }
 
 TEST_F(RequestParserTest, WellFormattedPost) {
-    ConnectionMock connection({
+    Connection::ConnectionMock connection({
         "POST / HTTP/1.1\r\n"
         "Host: localhost:9933\r\n"
         "User-Agent: curl/7.54.0\r\n"
@@ -159,7 +159,7 @@ TEST_F(RequestParserTest, WellFormattedPost) {
 
 
 TEST_F(RequestParserTest, NoCarriageReturnPost) {
-    ConnectionMock connection({
+    Connection::ConnectionMock connection({
         "POST / HTTP/1.1\n"
         "Host: localhost:9933\n"
         "User-Agent: curl/7.54.0\n"

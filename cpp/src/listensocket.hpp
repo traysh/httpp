@@ -3,12 +3,14 @@
 #include <memory>
 #include <netinet/in.h>
 
+namespace Connection {
 class Connection;
+}
 
 class ListenSocket
 {
 public:
-    using ConnectionPtr = std::unique_ptr<Connection>;
+    using ConnectionPtr = std::unique_ptr<Connection::Connection>;
 
     ListenSocket();
     virtual ~ListenSocket();

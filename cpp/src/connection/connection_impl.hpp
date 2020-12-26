@@ -10,6 +10,7 @@
 #include "connection.hpp"
 #include "listensocket_mocks.hpp"
 
+namespace Connection {
 class ConnectionImpl : public Connection {
    public:
 
@@ -48,4 +49,4 @@ class ConnectionImpl : public Connection {
     int _fd;
     struct sockaddr_in _address;
 };
-
+}

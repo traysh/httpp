@@ -8,6 +8,7 @@
 
 #include "connection.hpp"
 
+namespace Connection {
 class ConnectionMock : public Connection {
 public:
     const static size_t BufferSize = 1024;
@@ -55,4 +56,4 @@ private:
     size_t _request_count = 0;
     std::stringstream _outputBuffer;
 };
-
+}

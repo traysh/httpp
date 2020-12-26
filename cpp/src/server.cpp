@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-#include "connection.hpp"
+#include "connection/connection.hpp"
 #include "http/request.hpp"
 #include "http/response.hpp"
 #include "requesthandler.hpp"

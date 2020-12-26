@@ -8,13 +8,13 @@
 #include <vector>
 #include <map>
 
-#include "connection.hpp"
+#include "connection/connection.hpp"
 
 class SocketStreamBuffer : public std::streambuf {
 public:
     const static size_t BufferSize = 1024; // FIXME
 
-    SocketStreamBuffer(Connection& connection) : std::streambuf(), _connection(connection) {
+    SocketStreamBuffer(Connection::Connection& connection) : std::streambuf(), _connection(connection) {
         overflow();
         setg(_buffer[0], _buffer[0], _buffer[0]);
     }
@@ -208,7 +208,7 @@ protected:
     }
 
 private:
-    Connection& _connection;
+    Connection::Connection& _connection;
     std::vector<char*> _buffer;
     std::map<char*, size_t> _addressToBuffer;
     char* _validLimit = nullptr;

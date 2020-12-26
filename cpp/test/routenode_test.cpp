@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "connection_mock.hpp"
+#include "connection/connection_mock.hpp"
 #include "http/endpoint.hpp"
 #include "http/method_type.hpp"
 #include "route/node.hpp"

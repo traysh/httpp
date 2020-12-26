@@ -2,14 +2,14 @@
 
 #include <utility>
 
-#include "connection_mock.hpp"
+#include "connection/connection_mock.hpp"
 #include "http/request.hpp"
 #include "router.hpp"
 
 using RouterTest = ::testing::Test;
 using MethodType = HTTP::MethodType;
 
-ConnectionMock connection({});
+Connection::ConnectionMock connection({});
 HTTP::Request request;
 HTTP::Response response(connection);
 
@@ -24,7 +24,7 @@ auto testControllerNoRequest = [](auto&) {
 };
 
 TEST_F(RouterTest, GetDefaultNotFoundRoute) {
-    ConnectionMock connection({});
+    Connection::ConnectionMock connection({});
     HTTP::Response response(connection);
     Router router;
 
@@ -39,7 +39,7 @@ TEST_F(RouterTest, GetDefaultNotFoundRoute) {
 }
 
 TEST_F(RouterTest, GetCustomNotFoundRoute) {
-    ConnectionMock connection({});
+    Connection::ConnectionMock connection({});
     HTTP::Response response(connection);
     Router router;
 
