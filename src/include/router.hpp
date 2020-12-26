@@ -7,16 +7,16 @@
 #include "controller.hpp"
 #include "http/endpoint.hpp"
 #include "http/responsestatus.hpp"
-#include "route.hpp"
-#include "route_node.hpp"
-#include "route_node_lookup_result.hpp"
-#include "route_request.hpp"
+#include "route/route.hpp"
+#include "route/node.hpp"
+#include "route/node_lookup_result.hpp"
+#include "route/request.hpp"
 
 class Router {
     using MethodType = HTTP::MethodType;
     using Endpoint = HTTP::Endpoint;
 
-    RouteNode _routes;
+    Route::Node _routes;
 
    public:
     Router()
@@ -37,12 +37,12 @@ class Router {
         _routes.Add(Endpoint{path, method}, Controller(callable));
     }
 
-    inline void Add(const Route &data) {
+    inline void Add(const Route::Route &data) {
         auto [path, method, controller] = data;
         Add(path, method, controller);
     }
 
-    void Add(const std::initializer_list<Route> &init) {
+    void Add(const std::initializer_list<Route::Route> &init) {
         for (const auto &data : init) {
             Add(data);
         }
@@ -68,7 +68,7 @@ class Router {
         return Get({path, method});
     }
 
-    inline const RouteRequest Get(const Endpoint &key) const {
+    inline const Route::Request Get(const Endpoint &key) const {
         const auto &result = _routes.Get(key);
         if (!result.Controller) {
             return {_notFoundController, std::move(result.RouteParameters)};

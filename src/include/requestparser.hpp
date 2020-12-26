@@ -11,7 +11,6 @@
 #include <string>
 #include <unistd.h>
 
-#include "httpexceptions.hpp"
 #include "http/request.hpp"
 #include "socketstreambuffer.hpp"
 #include "streamprocessor.hpp"

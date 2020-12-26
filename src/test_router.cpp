@@ -88,12 +88,12 @@ TEST_F(RouterTest, CallsAddRouteAndGet) {
 TEST_F(RouterTest, CallsAddRouteWithTupleAndGet) {
     Router router;
 
-    Route route({"/test", MethodType::Get, testController});
+    Route::Route route({"/test", MethodType::Get, testController});
     router.Add(route);
     auto callTest = router.Get({"/test", MethodType::Get}).controller;
     EXPECT_THROW(callTest(request, response), TestControllerException); 
 
-    Route routeNoController({"/testNoRequest", MethodType::Get, testControllerNoRequest});
+    Route::Route routeNoController({"/testNoRequest", MethodType::Get, testControllerNoRequest});
     router.Add(routeNoController);
     auto callNoRequestTest = router.Get({"/testNoRequest", MethodType::Get}).controller;
     EXPECT_THROW(callNoRequestTest(request, response),

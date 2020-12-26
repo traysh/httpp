@@ -3,17 +3,17 @@
 #include "connection_mock.hpp"
 #include "http/endpoint.hpp"
 #include "http/method_type.hpp"
-#include "route_node.hpp"
+#include "route/node.hpp"
 
 namespace {
 
 TEST(RouteNodeTest, InitiallyEmpty) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 }
 
 TEST(RouteNodeTest, GetEmptyReturnsFalseForController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const HTTP::Endpoint endpoint{"/", HTTP::MethodType::Get};
@@ -24,7 +24,7 @@ TEST(RouteNodeTest, GetEmptyReturnsFalseForController) {
 }
 
 TEST(RouteNodeTest, AddOneController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -37,7 +37,7 @@ TEST(RouteNodeTest, AddOneController) {
 }
 
 TEST(RouteNodeTest, AddOneChildWithOneController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -55,7 +55,7 @@ TEST(RouteNodeTest, AddOneChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOne2ndLevelChildWithOneController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -73,7 +73,7 @@ TEST(RouteNodeTest, AddOne2ndLevelChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOneChildWithTwoControllers) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -93,7 +93,7 @@ TEST(RouteNodeTest, AddOneChildWithTwoControllers) {
 }
 
 TEST(RouteNodeTest, AddTwoChildrenWithOneControllerEach) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -113,7 +113,7 @@ TEST(RouteNodeTest, AddTwoChildrenWithOneControllerEach) {
 }
 
 TEST(RouteNodeTest, AddOneParameterizedChildWithOneController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -133,7 +133,7 @@ TEST(RouteNodeTest, AddOneParameterizedChildWithOneController) {
 }
 
 TEST(RouteNodeTest, AddOneParameterizedChildWithOne2ndLevelController) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();
@@ -159,7 +159,7 @@ TEST(RouteNodeTest, AddOneParameterizedChildWithOne2ndLevelController) {
 }
 
 TEST(RouteNodeTest, AddNestedParameterizedChildren) {
-    RouteNode node;
+    Route::Node node;
     EXPECT_TRUE(node.Empty());
 
     const auto& controller = Controller::Null();

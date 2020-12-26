@@ -8,15 +8,16 @@
 #include "controller.hpp"
 #include "http/endpoint.hpp"
 #include "util_string.hpp"
-#include "route_node_lookup_result.hpp"
+#include "node_lookup_result.hpp"
 
 
-class RouteNode {
+namespace Route {
+class Node {
     using Endpoint = HTTP::Endpoint;
     using MethodType = HTTP::MethodType;
 
 public:
-    explicit RouteNode()
+    explicit Node()
         : _children(), _controllers() {}
 
     bool Empty() { return _children.empty();  }
@@ -38,12 +39,12 @@ public:
             child_path = ':';
         }
 
-        auto [node_it, _] = _children.emplace(child_path, RouteNode{});
+        auto [node_it, _] = _children.emplace(child_path, Node{});
         node_it->second.Add(Endpoint{unprocessed, endpoint.Method}, controller);
     }
 
-    inline RouteNodeLookupResponse Get(const Endpoint& endpoint) const {
-        using ParametersType = typename RouteNodeLookupResponse::ParametersType;
+    inline NodeLookupResponse Get(const Endpoint& endpoint) const {
+        using ParametersType = typename NodeLookupResponse::ParametersType;
 
         const auto& clean_path = Util::String::RemoveLeadingOrTrailing(endpoint.Path, '/');
         if (clean_path.empty()) {
@@ -68,9 +69,10 @@ public:
     }
 
 private:
-    std::map<const std::string, RouteNode> _children;
+    std::map<const std::string, Node> _children;
     std::map<MethodType, Controller> _controllers;
     std::string _childParameterName;
 };
+}
 
 #endif // ROUTE_NODE_HPP

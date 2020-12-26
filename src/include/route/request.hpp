@@ -6,7 +6,9 @@
 
 class Controller;
 
-struct RouteRequest {
+namespace Route {
+struct Request {
     const Controller& controller;
     std::map<std::string, std::string> RouteParameters;
 };
+}

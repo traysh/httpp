@@ -6,10 +6,12 @@
 
 #include "controller.hpp"
 
-struct RouteNodeLookupResponse {
+namespace Route {
+struct NodeLookupResponse {
     using ParametersType = std::map<std::string, std::string>;
     const Controller* Controller;
     ParametersType RouteParameters;
 };
+}
 
 #endif // ROUTE_NODE_LOOKUP_RESULT

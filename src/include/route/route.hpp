@@ -5,6 +5,7 @@
 #include "controller.hpp"
 #include "http/method_type.hpp"
 
+namespace Route {
 class Route {
     public:
         using MethodType = HTTP::MethodType;
@@ -29,4 +30,4 @@ class Route {
               NoRequestCallableType callable)
             : Path(path), Method(method), controller(callable) {}
 };
-
+}
