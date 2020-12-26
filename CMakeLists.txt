@@ -21,20 +21,11 @@ configure_file (
   "${PROJECT_BINARY_DIR}/httppConfig.h"
   )
 
-# Search for headers directories
-file(GLOB_RECURSE includes CONFIGURE_DEPENDS "src/*.hpp")
-foreach(header ${includes})
-    get_filename_component(dir "${header}" DIRECTORY)
-    list(APPEND include_dirs ${dir})
-endforeach()
-list(REMOVE_DUPLICATES include_dirs)
-
-include_directories("${PROJECT_BINARY_DIR}" "${include_dirs}")
+include_directories(AFTER "cpp/src")
 
 # Whenever this glob's value changes, cmake will rerun and update the build with
 # the new/removed files.
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS "src/*.cpp")
-list(FILTER sources EXCLUDE REGEX "test_.*")
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "cpp/src/**.cpp")
 
 # add the libraries
 add_library("${CMAKE_PROJECT_NAME}_STATIC" ${sources} ${includes})
@@ -50,7 +41,7 @@ target_link_libraries("${CMAKE_PROJECT_NAME}_SHARED" ${CMAKE_THREAD_LIBS_INIT})
 ################################
 
 # echo server
-file(GLOB_RECURSE example_echo CONFIGURE_DEPENDS "examples/httpp/*.cpp")
+file(GLOB_RECURSE example_echo CONFIGURE_DEPENDS "cpp/examples/httpp/*.cpp")
 
 add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" EXCLUDE_FROM_ALL ${example_echo} ${includes})
 set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}_echo")
@@ -61,7 +52,7 @@ target_compile_options("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PRIVATE -Og -ggdb3)
 target_link_options("${CMAKE_PROJECT_NAME}_EXAMPLE_ECHO" PRIVATE -ggdb3)
 
 # index.html server
-file(GLOB_RECURSE example_server CONFIGURE_DEPENDS "examples/server/*.cpp")
+file(GLOB_RECURSE example_server CONFIGURE_DEPENDS "cpp/examples/server/*.cpp")
 
 add_executable("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" EXCLUDE_FROM_ALL ${example_server} ${includes})
 set_target_properties("${CMAKE_PROJECT_NAME}_EXAMPLE_SERVER" PROPERTIES OUTPUT_NAME "${CMAKE_PROJECT_NAME}_server")
@@ -82,7 +73,7 @@ add_subdirectory (googletest EXCLUDE_FROM_ALL)
 mark_as_advanced(BUILD_GMOCK)
 
 # Unit Tests
-file(GLOB_RECURSE tests CONFIGURE_DEPENDS "test/*.{h,c}pp" "src/test_*.cpp")
+file(GLOB_RECURSE tests CONFIGURE_DEPENDS "cpp/test/*.cpp")
 add_executable(unit EXCLUDE_FROM_ALL ${tests} ${sources} ${includes})
 
 # Link test executable against gtest & gtest_main
@@ -108,7 +99,7 @@ add_custom_target(test-unit
                   COMMAND gcovr -r ${PROJECT_SOURCE_DIR} -sp
                                 --gcov-executable "${GCOV_BIN}"
                                 --exclude-directories 'googletest|build'
-                                --filter ${PROJECT_SOURCE_DIR}/src
+                                --filter ${PROJECT_SOURCE_DIR}/cpp/src
                                 --exclude '\.\./.*/test_.*|\.\./.*_prod\..*'
                   DEPENDS unit)
 add_custom_target(test-debug
