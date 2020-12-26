@@ -6,7 +6,7 @@
 #include "connection.hpp"
 #include "http/headerkey.hpp"
 #include "http/responsestatus.hpp"
-#include "util_string.hpp"
+#include "util/string.hpp"
 
 namespace HTTP {
 struct Response {

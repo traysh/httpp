@@ -7,7 +7,7 @@
 
 #include "controller.hpp"
 #include "http/endpoint.hpp"
-#include "util_string.hpp"
+#include "util/string.hpp"
 #include "node_lookup_result.hpp"
 
 

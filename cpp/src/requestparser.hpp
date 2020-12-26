@@ -14,7 +14,7 @@
 #include "http/request.hpp"
 #include "socketstreambuffer.hpp"
 #include "streamprocessor.hpp"
-#include "util_string.hpp"
+#include "util/string.hpp"
 
 class Connection;
 
