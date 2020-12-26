@@ -148,14 +148,6 @@ Note: this is just a proposal to be discussed between project members
    - [ ] JSON parser for this content-type
    - [x] router for endpoints
    - [ ] middleware support
-- version 1.5
-   - [ ] Use epoll for Linux and kqueue for MacOS (performance improvements)
-- version 2.0
-   - [ ] websocket support
-- version 3.0
-   - [ ] HTTP/2.0 support
-- version 4.0
-   - [ ] QUIC support
 
 # TODO
 
