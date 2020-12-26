@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include "connection.hpp"
-#include "httpheaderkey.hpp"
+#include "http/headerkey.hpp"
 #include "http/responsestatus.hpp"
 #include "util_string.hpp"
 
@@ -12,7 +12,7 @@ namespace HTTP {
 struct Response {
     public:
         using StatusType = HTTP::ResponseStatus::Type;
-        using HeadersType = std::map<HTTPHeaderKey, std::string>;
+        using HeadersType = std::map<HTTP::HeaderKey, std::string>;
 
         enum class OperationMode { Sync, Async };
 
@@ -63,11 +63,11 @@ struct Response {
         inline std::string generateAsyncHeaders(const std::string& payload) {
             using namespace Util::String;
 
-            if (auto it = Header.find(HTTPHeaderKey("Connection"));
+            if (auto it = Header.find(HTTP::HeaderKey("Connection"));
                 it == Header.end() || ToUpper(Trim(it->second)) != "CLOSE") {
 
                 if (payload.size() > 0) {
-                    Header.emplace(HTTPHeaderKey("Content-Length"),
+                    Header.emplace(HTTP::HeaderKey("Content-Length"),
                                    std::to_string(payload.size()));
                 }
             }

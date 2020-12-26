@@ -4,15 +4,16 @@
 
 #include "util_string.hpp"
 
-struct HTTPHeaderKey {
-    HTTPHeaderKey(const std::string& str)
+namespace HTTP {
+struct HeaderKey {
+    HeaderKey(const std::string& str)
         : _data(Util::String::ToUpper(str)) {}
 
     operator const std::string&() const {
         return _data;
     }
 
-    inline bool operator<(const HTTPHeaderKey& other) const { 
+    inline bool operator<(const HeaderKey& other) const { 
         const auto& this_str = static_cast<std::string>(*this);
         const auto& other_str = static_cast<std::string>(other);
         return this_str < other_str;
@@ -21,4 +22,4 @@ struct HTTPHeaderKey {
     private:
         std::string _data;
 };
-
+}
