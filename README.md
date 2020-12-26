@@ -25,7 +25,7 @@ int main() {
     Server server;
 
     auto& router = server.GetRouter();
-    using Method = HTTP::Request::MethodType;
+    using Method = HTTP::MethodType;
     router.Add({
         { "/hi", Method::Get,
             [](auto& response) {

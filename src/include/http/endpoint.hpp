@@ -2,9 +2,9 @@
 #define HTTP_ENDPOINT_HPP
 
 #include <string>
-#include "request_method_type.hpp"
+#include "method_type.hpp"
 
-namespace HTTP::Request {
+namespace HTTP {
 
 struct Endpoint {
     std::string Path;

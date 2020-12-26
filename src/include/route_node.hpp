@@ -7,14 +7,13 @@
 
 #include "controller.hpp"
 #include "http/endpoint.hpp"
-#include "http/request_method_type.hpp"
 #include "util_string.hpp"
 #include "route_node_lookup_result.hpp"
 
 
 class RouteNode {
-    using Endpoint = HTTP::Request::Endpoint;
-    using MethodType = HTTP::Request::MethodType;
+    using Endpoint = HTTP::Endpoint;
+    using MethodType = HTTP::MethodType;
 
 public:
     explicit RouteNode()

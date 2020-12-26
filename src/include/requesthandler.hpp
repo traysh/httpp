@@ -5,7 +5,7 @@
 #include <functional>
 #include <thread>
 
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "requestparser.hpp"
 #include "route_request.hpp"
 #include "router.hpp"
@@ -136,7 +136,7 @@ class RequestHandler {
     SocketStreamBuffer _buffer;
     RequestParser _parser;
     Router& _router;
-    HTTPRequest _request;
+    HTTP::Request _request;
     HTTP::Response _response;
     std::chrono::system_clock::time_point _createdAt;
 };

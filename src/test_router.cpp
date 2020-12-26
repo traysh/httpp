@@ -3,14 +3,14 @@
 #include <utility>
 
 #include "connection_mock.hpp"
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "router.hpp"
 
 using RouterTest = ::testing::Test;
-using MethodType = HTTP::Request::MethodType;
+using MethodType = HTTP::MethodType;
 
 ConnectionMock connection({});
-HTTPRequest request;
+HTTP::Request request;
 HTTP::Response response(connection);
 
 struct TestControllerException {};

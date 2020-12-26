@@ -20,7 +20,7 @@ const std::list<typename RequestParser::_ParseStep>
         &RequestParser::parseBody
     };
 
-typename RequestParser::Result RequestParser::Parse(HTTPRequest& request) {
+typename RequestParser::Result RequestParser::Parse(HTTP::Request& request) {
     for (; _currentStep != _parseSequence.end(); ++_currentStep) {
         auto f = *_currentStep;
         auto result = (this->*f)(request);
@@ -33,7 +33,7 @@ typename RequestParser::Result RequestParser::Parse(HTTPRequest& request) {
 }
 
 typename RequestParser::Result RequestParser::parseRequestLine(
-        HTTPRequest& request) {
+        HTTP::Request& request) {
     std::string method, path, protocol, protocolVersion, rest;
     std::array<std::string*, 3> values { &method, &path, &protocol };
 
@@ -88,7 +88,7 @@ typename RequestParser::Result RequestParser::parseRequestLine(
     return Result::Success;
 }
 
-typename RequestParser::Result RequestParser::parseHeaders(HTTPRequest& request) {
+typename RequestParser::Result RequestParser::parseHeaders(HTTP::Request& request) {
     std::istream::sentry sentry(_stream);
     (void)sentry;
     StreamProcessor processor(_stream);
@@ -130,7 +130,7 @@ typename RequestParser::Result RequestParser::parseHeaders(HTTPRequest& request)
     return Result::Success;
 }
 
-typename RequestParser::Result RequestParser::parseBody(HTTPRequest& request) {
+typename RequestParser::Result RequestParser::parseBody(HTTP::Request& request) {
     // TODO handle "Transfer-Encoding" as supposed:
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html
     const char content_length_key[] = "CONTENT-LENGTH";
@@ -186,41 +186,41 @@ typename RequestParser::Result RequestParser::parseBody(HTTPRequest& request) {
     return Result::Success;
 }
 
-HTTP::Request::MethodType RequestParser::mapMethod(const std::string& str) {
-    const static std::map<std::string, HTTP::Request::MethodType> m {
-        { "GET", HTTP::Request::MethodType::Get },
-        { "HEAD", HTTP::Request::MethodType::Head },
-        { "POST", HTTP::Request::MethodType::Post },
-        { "PUT", HTTP::Request::MethodType::Put },
-        { "DELETE", HTTP::Request::MethodType::Delete },
-        { "CONNECT", HTTP::Request::MethodType::Connect },
-        { "OPTIONS", HTTP::Request::MethodType::Options },
-        { "TRACE", HTTP::Request::MethodType::Trace },
-        { "PATCH", HTTP::Request::MethodType::Patch },
+HTTP::MethodType RequestParser::mapMethod(const std::string& str) {
+    const static std::map<std::string, HTTP::MethodType> m {
+        { "GET", HTTP::MethodType::Get },
+        { "HEAD", HTTP::MethodType::Head },
+        { "POST", HTTP::MethodType::Post },
+        { "PUT", HTTP::MethodType::Put },
+        { "DELETE", HTTP::MethodType::Delete },
+        { "CONNECT", HTTP::MethodType::Connect },
+        { "OPTIONS", HTTP::MethodType::Options },
+        { "TRACE", HTTP::MethodType::Trace },
+        { "PATCH", HTTP::MethodType::Patch },
     };
 
-    HTTP::Request::MethodType type;
+    HTTP::MethodType type;
     try {
         type = m.at(str);
     }
     catch (const std::out_of_range& e) {
-        return HTTP::Request::MethodType::Unknown;
+        return HTTP::MethodType::Unknown;
     }
 
     return type;
 }
 
-HTTPRequest::ProtocolType RequestParser::mapProtocol(const std::string& str) {
-    const static std::map<std::string, HTTPRequest::ProtocolType> m {
-        { "HTTP", HTTPRequest::ProtocolType::HTTP },
+ProtocolType RequestParser::mapProtocol(const std::string& str) {
+    const static std::map<std::string, ProtocolType> m {
+        { "HTTP", ProtocolType::HTTP },
     };
 
-    HTTPRequest::ProtocolType type;
+    ProtocolType type;
     try {
         type = m.at(str);
     }
     catch (const std::out_of_range& e) {
-        return HTTPRequest::ProtocolType::Unknown;
+        return ProtocolType::Unknown;
     }
 
     return type;

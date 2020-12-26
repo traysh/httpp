@@ -3,19 +3,16 @@
 #include <string>
 #include <map>
 
-#include "http/request_method_type.hpp"
+#include "method_type.hpp"
+#include "protocol.hpp"
 #include "requestpayload.hpp"
 
-//TODO namespace HTTP
-struct HTTPRequest {
+namespace HTTP {
+struct Request {
     using HeadersType = std::map<std::string, std::string>;
     using ParametersType = std::map<std::string, std::string>;
 
-    enum class ProtocolType {
-        Unknown, HTTP,
-    };
-
-    HTTP::Request::MethodType Method;
+    HTTP::MethodType Method;
     std::string Path;
     ProtocolType Protocol;
     std::string ProtocolVersion;
@@ -23,3 +20,4 @@ struct HTTPRequest {
     RequestPayload Body;
     ParametersType parameters;
 };
+}

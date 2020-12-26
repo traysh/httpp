@@ -1,4 +1,4 @@
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "http/response.hpp"
 #include "router.hpp"
 #include "server.hpp"
@@ -13,7 +13,7 @@ int main() {
     server.SetReuseAddress();
 
     auto& router = server.GetRouter();
-    router.SetNotFoundHandler([](const HTTPRequest& request, HTTP::Response& response) {
+    router.SetNotFoundHandler([](const HTTP::Request& request, HTTP::Response& response) {
             std::string clean_path;
             size_t i;
             for (i = 0; i < request.Path.size(); ++i) {

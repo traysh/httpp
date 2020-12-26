@@ -1,7 +1,7 @@
 #include "server.hpp"
 
 #include "connection.hpp"
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "http/response.hpp"
 #include "requesthandler.hpp"
 #include "requestparser.hpp"

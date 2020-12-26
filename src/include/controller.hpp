@@ -2,12 +2,12 @@
 
 #include <functional>
 
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "http/response.hpp"
 
 class Controller {
     public:
-        using CallableType = void(*)(const HTTPRequest&, HTTP::Response&);
+        using CallableType = void(*)(const HTTP::Request&, HTTP::Response&);
         using NoRequestCallableType = void(*)(HTTP::Response&);
 
         static Controller Null() {
@@ -20,7 +20,7 @@ class Controller {
                 _callable = nullptr;
             }
             else {
-                _callable = [callable](const HTTPRequest&, HTTP::Response& response) {
+                _callable = [callable](const HTTP::Request&, HTTP::Response& response) {
                     callable(response);
                 };
             }
@@ -30,14 +30,14 @@ class Controller {
             return static_cast<bool>(_callable);
         }
 
-        auto operator() (const HTTPRequest& request, HTTP::Response& response)  const {
+        auto operator() (const HTTP::Request& request, HTTP::Response& response)  const {
             return _callable(request, response);
         }
 
     private:
-        using WrappedCallable = std::function<void(const HTTPRequest&,
+        using WrappedCallable = std::function<void(const HTTP::Request&,
                                                    HTTP::Response&)>;
-        std::function<void(const HTTPRequest&, HTTP::Response&)> _callable;
+        std::function<void(const HTTP::Request&, HTTP::Response&)> _callable;
 
         Controller() : _callable() {}
 };

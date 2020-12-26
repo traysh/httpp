@@ -12,13 +12,13 @@ TEST_F(RequestParserTest, WellFormattedRequestLine) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result,  decltype(parser)::Result::Success);
-    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 }
 
@@ -27,7 +27,7 @@ TEST_F(RequestParserTest, SlowClientRequestLine) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::NoInputData);
@@ -43,7 +43,7 @@ TEST_F(RequestParserTest, UnprocessableRequestLine) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::Failed);
@@ -60,15 +60,15 @@ TEST_F(RequestParserTest, WellFormattedRequestHeader) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -90,7 +90,7 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::NoInputData);
@@ -104,9 +104,9 @@ TEST_F(RequestParserTest, SlowWellFormattedRequestHeader) {
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Get);
+    EXPECT_EQ(request.Method, HTTP::MethodType::Get);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -133,15 +133,15 @@ TEST_F(RequestParserTest, WellFormattedPost) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Post);
+    EXPECT_EQ(request.Method, HTTP::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers
@@ -171,15 +171,15 @@ TEST_F(RequestParserTest, NoCarriageReturnPost) {
     SocketStreamBuffer buffer(connection);
     RequestParser parser(buffer);
 
-    HTTPRequest request;
+    HTTP::Request request;
     auto result = parser.Parse(request);
 
     EXPECT_EQ(result, decltype(parser)::Result::Success);
 
     // Status line
-    EXPECT_EQ(request.Method, HTTP::Request::MethodType::Post);
+    EXPECT_EQ(request.Method, HTTP::MethodType::Post);
     EXPECT_EQ(request.Path, "/");
-    EXPECT_EQ(request.Protocol, HTTPRequest::ProtocolType::HTTP);
+    EXPECT_EQ(request.Protocol, ProtocolType::HTTP);
     EXPECT_EQ(request.ProtocolVersion, "1.1");
 
     // Headers

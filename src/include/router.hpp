@@ -13,8 +13,8 @@
 #include "route_request.hpp"
 
 class Router {
-    using MethodType = HTTP::Request::MethodType;
-    using Endpoint = HTTP::Request::Endpoint;
+    using MethodType = HTTP::MethodType;
+    using Endpoint = HTTP::Endpoint;
 
     RouteNode _routes;
 

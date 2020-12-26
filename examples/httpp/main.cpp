@@ -1,4 +1,4 @@
-#include "httprequest.hpp"
+#include "http/request.hpp"
 #include "server.hpp"
 
 int main() {
@@ -8,7 +8,7 @@ int main() {
     server.SetReuseAddress();
 
     auto& router = server.GetRouter();
-    using Method = HTTP::Request::MethodType;
+    using Method = HTTP::MethodType;
     router.Add({
         { "/ping", Method::Get,
             [](auto& response) {

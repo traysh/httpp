@@ -3,11 +3,11 @@
 #include <string>
 
 #include "controller.hpp"
-#include "http/request_method_type.hpp"
+#include "http/method_type.hpp"
 
 class Route {
     public:
-        using MethodType = HTTP::Request::MethodType;
+        using MethodType = HTTP::MethodType;
         using KeyType = std::pair<std::string, MethodType>;
 
         using CallableType = typename Controller::CallableType;
