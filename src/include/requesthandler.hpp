@@ -44,13 +44,13 @@ class RequestHandler {
     inline void GenericError() {
         _state = StateType::Failed;
         _response.Clear();
-        _response.Status = HTTPResponseStatus::Type::InternalServerError;
+        _response.Status = HTTP::ResponseStatus::Type::InternalServerError;
     }
 
     inline void Timeout() {
         _state = StateType::Failed;
         _response.Clear();
-        _response.Status = HTTPResponseStatus::Type::RequestTimeOut;
+        _response.Status = HTTP::ResponseStatus::Type::RequestTimeOut;
     }
 
     StateType Process() {

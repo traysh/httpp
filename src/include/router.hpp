@@ -6,7 +6,7 @@
 
 #include "controller.hpp"
 #include "http/endpoint.hpp"
-#include "httpresponsestatus.hpp"
+#include "http/responsestatus.hpp"
 #include "route.hpp"
 #include "route_node.hpp"
 #include "route_node_lookup_result.hpp"
@@ -21,12 +21,12 @@ class Router {
    public:
     Router()
         : _notFoundController([](auto &response) {
-              response.Status = HTTPResponseStatus::Type::NotFound;
+              response.Status = HTTP::ResponseStatus::Type::NotFound;
               response.Header.emplace("Connection", "Close");
               response << "Not found\r\n";
           }),
           _internalErrorController([](auto &response) {
-              response.Status = HTTPResponseStatus::Type::InternalServerError;
+              response.Status = HTTP::ResponseStatus::Type::InternalServerError;
               response.Header.emplace("Connection", "Close");
               response << "Internal server error\r\n";
           }) {}

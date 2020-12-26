@@ -3,7 +3,8 @@
 #include <map>
 #include <sstream>
 
-struct HTTPResponseStatus {
+namespace HTTP {
+struct ResponseStatus {
     enum class Type {
         Continue = 100,
         SwitchingProtocols = 101,
@@ -51,12 +52,12 @@ struct HTTPResponseStatus {
     Type Code;
     const char* Reason;
 
-    HTTPResponseStatus(Type code = Type::OK) : Reason("") {
+    ResponseStatus(Type code = Type::OK) : Reason("") {
         SetStatus(code);
     };
 
-    HTTPResponseStatus(int code = 200)
-        : HTTPResponseStatus(static_cast<Type>(code)) {}
+    ResponseStatus(int code = 200)
+        : ResponseStatus(static_cast<Type>(code)) {}
 
     operator std::string() const {
         std::stringstream stream;
@@ -122,20 +123,20 @@ struct HTTPResponseStatus {
 };
 
 inline bool operator==(const std::string& other,
-                       const HTTPResponseStatus& status) {
+                       const ResponseStatus& status) {
     return static_cast<std::string>(status) == other;
 }
 
-inline bool operator==(const HTTPResponseStatus& status,
+inline bool operator==(const ResponseStatus& status,
                        const std::string& other) {
     return other == status;
 }
 
 inline std::ostream& operator<<(std::ostream& stream,
-                                const HTTPResponseStatus& status) {
+                                const ResponseStatus& status) {
     stream << status.HTTPVersion << " "
            << static_cast<int>(status.Code) << " "
            << status.Reason << "\r\n";
     return stream;
 }
-
+}

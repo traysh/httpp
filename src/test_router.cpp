@@ -44,7 +44,7 @@ TEST_F(RouterTest, GetCustomNotFoundRoute) {
     Router router;
 
     router.SetNotFoundHandler([](HTTP::Response& response) {
-        response.Status = HTTPResponseStatus::Type::NotFound;
+        response.Status = HTTP::ResponseStatus::Type::NotFound;
         response << "Route not found!";
     });
 

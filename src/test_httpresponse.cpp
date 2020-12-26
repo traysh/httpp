@@ -7,7 +7,7 @@
 
 using HTTPResponseTest = ::testing::Test;
 
-using StatusType = HTTPResponseStatus::Type;
+using StatusType = HTTP::ResponseStatus::Type;
 
 TEST_F(HTTPResponseTest, CheckOKResponseMessage) {
     ConnectionMock connection({""});

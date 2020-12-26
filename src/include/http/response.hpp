@@ -5,18 +5,18 @@
 
 #include "connection.hpp"
 #include "httpheaderkey.hpp"
-#include "httpresponsestatus.hpp"
+#include "http/responsestatus.hpp"
 #include "util_string.hpp"
 
 namespace HTTP {
 struct Response {
     public:
-        using StatusType = HTTPResponseStatus::Type;
+        using StatusType = HTTP::ResponseStatus::Type;
         using HeadersType = std::map<HTTPHeaderKey, std::string>;
 
         enum class OperationMode { Sync, Async };
 
-        HTTPResponseStatus Status;
+        HTTP::ResponseStatus Status;
         OperationMode Mode = OperationMode::Async;
         HeadersType Header;
 

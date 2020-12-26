@@ -45,7 +45,7 @@ int main() {
         }},
      });
     router.SetNotFoundHandler([](auto& response) {
-        response.Status = HTTPResponseStatus::Type::NotFound;
+        response.Status = HTTP::ResponseStatus::Type::NotFound;
         response << "sorry, I don't know that URL";
     });
 
