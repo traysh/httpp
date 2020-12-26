@@ -13,16 +13,16 @@
 
 #include "http/request.hpp"
 #include "socketstreambuffer.hpp"
-#include "streamprocessor.hpp"
+#include "util/streamprocessor.hpp"
 #include "util/string.hpp"
 
 namespace HTTP {
 class RequestParser {
-    using _ParseStep = StreamProcessor::Result(RequestParser::*)(HTTP::Request&);
+    using _ParseStep = Util::StreamProcessor::Result(RequestParser::*)(HTTP::Request&);
     using _Iterator = typename std::list<_ParseStep>::const_iterator;
 
 public:
-    using Result = StreamProcessor::Result;
+    using Result = Util::StreamProcessor::Result;
 
     RequestParser(SocketStreamBuffer& buffer, _Iterator currentStep = _parseSequence.begin()) 
         : _buffer(buffer), _stream(&_buffer), _currentStep(currentStep) {}

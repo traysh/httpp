@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string_view>
 
+namespace Util {
 class StreamProcessor {
 public:
     enum class Result { Success, Failed, IncompleteInputData, NoInputData };
@@ -97,3 +98,4 @@ public:
 private:
     std::istream& _stream;
 };
+}

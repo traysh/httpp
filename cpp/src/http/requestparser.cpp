@@ -42,7 +42,7 @@ typename RequestParser::Result RequestParser::parseRequestLine(
 
     std::istream::sentry sentry(_stream);
     (void)sentry;
-    StreamProcessor processor(_stream);
+    Util::StreamProcessor processor(_stream);
     for (auto value : values) {
         auto result = processor.ExtractWord(*value);
         if (result != Result::Success) {
@@ -92,7 +92,7 @@ typename RequestParser::Result RequestParser::parseRequestLine(
 typename RequestParser::Result RequestParser::parseHeaders(HTTP::Request& request) {
     std::istream::sentry sentry(_stream);
     (void)sentry;
-    StreamProcessor processor(_stream);
+    Util::StreamProcessor processor(_stream);
     std::string rest;
 
     while (_stream.good() && !processor.NewLine()) {

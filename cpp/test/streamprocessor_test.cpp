@@ -2,7 +2,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include "streamprocessor.hpp"
+#include "util/streamprocessor.hpp"
 
 using StreamProcessorNewLineTest = ::testing::Test;
 using StreamProcessorExtractWordTest = ::testing::Test;
@@ -12,7 +12,7 @@ TEST_F(StreamProcessorNewLineTest, NewLine) {
     std::stringstream ss(str);
 
     ss.ignore(4);
-    EXPECT_TRUE(StreamProcessor::NewLine(ss));
+    EXPECT_TRUE(Util::StreamProcessor::NewLine(ss));
 }
 
 TEST_F(StreamProcessorNewLineTest, NewLineWithCarriageReturn) {
@@ -20,7 +20,7 @@ TEST_F(StreamProcessorNewLineTest, NewLineWithCarriageReturn) {
     std::stringstream ss(str);
 
     ss.ignore(4);
-    EXPECT_TRUE(StreamProcessor::NewLine(ss));
+    EXPECT_TRUE(Util::StreamProcessor::NewLine(ss));
 }
 
 TEST_F(StreamProcessorNewLineTest, CarriageReturnWithoutNewLine) {
@@ -28,7 +28,7 @@ TEST_F(StreamProcessorNewLineTest, CarriageReturnWithoutNewLine) {
     std::stringstream ss(str);
 
     ss.ignore(4);
-    EXPECT_FALSE(StreamProcessor::NewLine(ss));
+    EXPECT_FALSE(Util::StreamProcessor::NewLine(ss));
 }
 
 TEST_F(StreamProcessorNewLineTest, NoNewLine) {
@@ -36,7 +36,7 @@ TEST_F(StreamProcessorNewLineTest, NoNewLine) {
     std::stringstream ss(str);
 
     ss.ignore(4);
-    EXPECT_FALSE(StreamProcessor::NewLine(ss));
+    EXPECT_FALSE(Util::StreamProcessor::NewLine(ss));
 }
 
 TEST_F(StreamProcessorNewLineTest, eof) {
@@ -44,14 +44,14 @@ TEST_F(StreamProcessorNewLineTest, eof) {
     std::stringstream ss(str);
 
     ss.ignore(4);
-    EXPECT_FALSE(StreamProcessor::NewLine(ss));
+    EXPECT_FALSE(Util::StreamProcessor::NewLine(ss));
 }
 
 TEST_F(StreamProcessorExtractWordTest,
        3WordsSameLineWithSpacesSeparators) {
     std::string str = "first second third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::stringstream ss_ref(str);
     std::string word;
@@ -59,22 +59,22 @@ TEST_F(StreamProcessorExtractWordTest,
 
     auto success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 }
 
@@ -82,7 +82,7 @@ TEST_F(StreamProcessorExtractWordTest,
        3WordsSameLineWithMultipleSpacesSeparators) {
     std::string str = "first   second          third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::stringstream ss_ref(str);
     std::string word;
@@ -90,22 +90,22 @@ TEST_F(StreamProcessorExtractWordTest,
 
     auto success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word);
     ss_ref >> word_ref;
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 }
 
@@ -113,7 +113,7 @@ TEST_F(StreamProcessorExtractWordTest,
        3WordsMultiLineWithMultipleSpacesSeparators) {
     std::string str = "first\n   second   \n      third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::stringstream ss_ref(str);
     std::string word;
@@ -121,22 +121,22 @@ TEST_F(StreamProcessorExtractWordTest,
 
     auto success = processor.ExtractWord(word, true);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, true);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, true);
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, true);
     ss_ref >> word_ref;
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 }
 
@@ -144,7 +144,7 @@ TEST_F(StreamProcessorExtractWordTest,
        3WordsMultiLineWithColonSeparators) {
     std::string str = "first:second:third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::string str_ref = str;
     std::replace(str_ref.begin(), str_ref.end(), ':', ' ');
@@ -154,22 +154,22 @@ TEST_F(StreamProcessorExtractWordTest,
 
     auto success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false, false, {':'});
     ss_ref >> word_ref;
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 }
 
@@ -177,19 +177,19 @@ TEST_F(StreamProcessorExtractWordTest,
        3WordsSameLineWithInvalidChar) {
     std::string str = "first second third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::string word;
 
     auto success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'r'});
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
 }
 
 TEST_F(StreamProcessorExtractWordTest,
        3WordsSameLineWithoutInvalidChar) {
     std::string str = "first second third\n";
     std::stringstream ss(str);
-    StreamProcessor processor(ss);
+    Util::StreamProcessor processor(ss);
 
     std::stringstream ss_ref(str);
     std::string word;
@@ -197,22 +197,22 @@ TEST_F(StreamProcessorExtractWordTest,
 
     auto success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
-    ASSERT_TRUE(success == StreamProcessor::Result::Success);
+    ASSERT_TRUE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 
     success = processor.ExtractWord(word, false,  false, {' '}, {' '}, {'a'});
     ss_ref >> word_ref;
-    ASSERT_FALSE(success == StreamProcessor::Result::Success);
+    ASSERT_FALSE(success == Util::StreamProcessor::Result::Success);
     EXPECT_EQ(word, word_ref);
 }
 
