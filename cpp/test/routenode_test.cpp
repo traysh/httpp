@@ -4,8 +4,20 @@
 #include "http/endpoint.hpp"
 #include "http/method_type.hpp"
 #include "server/route/node.hpp"
+#include "server/route/node_lookup_result.hpp"
+#include "server/route/route.hpp"
 
 namespace {
+
+// debugging helper
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-const-variable"
+constexpr auto printParams = [](auto& params) {
+    for (const auto& [key, value] : params.RouteParameters) {
+        std::cout << key << ": " << value << std::endl;
+    }
+};
+#pragma clang diagnostic pop
 
 TEST(RouteNodeTest, InitiallyEmpty) {
     Server::Route::Node node;
@@ -184,6 +196,99 @@ TEST(RouteNodeTest, AddNestedParameterizedChildren) {
     const auto& yet_another_result = node.Get(get_endpoint);
     EXPECT_FALSE(yet_another_result.Controller);
     EXPECT_FALSE(yet_another_result.RouteParameters.empty());
+}
+
+TEST(RouteNodeTest, AddOneWildcardRoute) {
+    Server::Route::Node node;
+    EXPECT_TRUE(node.Empty());
+
+    const auto& controller = Server::Controller::Null();
+    const HTTP::Endpoint endpoint{"/*", HTTP::MethodType::Get};
+    node.Add(endpoint, controller);
+
+    std::vector<Server::Route::NodeLookupResponse> results;
+    results.push_back(node.Get({"/some_words", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/@$#%^", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/some_words/more_words", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+    EXPECT_EQ(results.back().RouteParameters.at("*"), "some_words/more_words");
+}
+
+TEST(RouteNodeTest, AddWildcardRouteAndSomeNot) {
+    Server::Route::Node node;
+    EXPECT_TRUE(node.Empty());
+
+    const auto& controller = Server::Controller::Null();
+
+    node.Add({"/some_words", HTTP::MethodType::Get}, controller);
+    node.Add({"/*", HTTP::MethodType::Get}, controller);
+    node.Add({"/@$#%^", HTTP::MethodType::Get}, controller);
+
+    std::vector<Server::Route::NodeLookupResponse> results;
+
+    results.push_back(node.Get({"/some_words", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/@$#%^", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/catchme_wildcard", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+    EXPECT_EQ(results.back().RouteParameters.at("*"), "catchme_wildcard");
+
+    results.push_back(node.Get({"/catchme_wildcard/nested", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+    EXPECT_EQ(results.back().RouteParameters.at("*"), "catchme_wildcard/nested");
+
+    results.push_back(node.Get({"/some_words/more_words", HTTP::MethodType::Get}));
+    EXPECT_FALSE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+}
+
+TEST(RouteNodeTest, AddNestedWildcardRouteAndSomeNot) {
+    Server::Route::Node node;
+    EXPECT_TRUE(node.Empty());
+
+    const auto& controller = Server::Controller::Null();
+
+    node.Add({"/some_words", HTTP::MethodType::Get}, controller);
+    node.Add({"/some_words/*", HTTP::MethodType::Get}, controller);
+    node.Add({"/@$#%^", HTTP::MethodType::Get}, controller);
+
+    std::vector<Server::Route::NodeLookupResponse> results;
+
+    results.push_back(node.Get({"/some_words", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/@$#%^", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/doesnotexist", HTTP::MethodType::Get}));
+    EXPECT_FALSE(results.back().Controller);
+    EXPECT_TRUE(results.back().RouteParameters.empty());
+
+    results.push_back(node.Get({"/some_words/catchme_wildcard", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+    EXPECT_EQ(results.back().RouteParameters.at("*"), "catchme_wildcard");
+
+    results.push_back(node.Get({"/some_words/catchme_wildcard/even_more", HTTP::MethodType::Get}));
+    EXPECT_TRUE(results.back().Controller);
+    EXPECT_FALSE(results.back().RouteParameters.empty());
+    EXPECT_EQ(results.back().RouteParameters.at("*"), "catchme_wildcard/even_more");
 }
 
 }

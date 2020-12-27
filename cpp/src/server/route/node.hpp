@@ -49,9 +49,15 @@ public:
 
         const auto& clean_path = Util::String::RemoveLeadingOrTrailing(endpoint.Path, '/');
         if (clean_path.empty()) {
-            auto it = _controllers.find(endpoint.Method);
-            if (it == _controllers.end()) return {};
-            return { &it->second, ParametersType() };
+            if (auto it = _controllers.find(endpoint.Method); it != _controllers.end()) {
+                return { &it->second, ParametersType() };
+            }
+            
+            if (auto it = _children.find("*"); it != _children.end()) {
+                return it->second.Get(Endpoint{"", endpoint.Method});
+            }
+
+            return {};
         }
 
         const auto [child_path, unprocessed] = Util::String::Split(clean_path, "/");
@@ -63,6 +69,17 @@ public:
         if (auto it = _children.find(":"); it != _children.end()) {
             auto [controller, parameters] = it->second.Get(Endpoint{unprocessed, endpoint.Method});
             parameters[_childParameterName] = child_path;
+            return {controller, std::move(parameters)};
+        }
+
+        if (auto it = _children.find("*"); it != _children.end()) {
+            auto [controller, parameters] = it->second.Get(Endpoint{"", endpoint.Method});
+            if (unprocessed.empty()) {
+                parameters["*"] = child_path;
+            }
+            else {
+                parameters["*"] = child_path + "/" + unprocessed;
+            }
             return {controller, std::move(parameters)};
         }
 

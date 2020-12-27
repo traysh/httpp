@@ -25,11 +25,11 @@ class Route {
 
         Route(const std::string& path, const MethodType& method,
               CallableType callable)
-            : Path(path), Method(method), controller(callable) {}
+            : Route(path, method, Controller(callable)) {}
 
         Route(const std::string& path, const MethodType& method,
               NoRequestCallableType callable)
-            : Path(path), Method(method), controller(callable) {}
+            : Route(path, method, Controller(callable)) {}
 };
 }
 }
