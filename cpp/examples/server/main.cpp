@@ -15,26 +15,17 @@ int main() {
     auto& router = server.GetRouter();
     router.Add("/*", HTTP::MethodType::Get,
             [](const HTTP::Request& request, HTTP::Response& response) {
-                std::string clean_path;
-                size_t i;
-                for (i = 0; i < request.Path.size(); ++i) {
-                    if (request.Path[i] != '/') break;
-                }
-
-                clean_path = request.Path.substr(i);
-                if (clean_path.empty()) {
-                    clean_path = "index.html";
-                }
-                std::cout << "requested file: " << clean_path << std::endl;
+                auto path = request.parameters.empty() ?  "index.html" : request.parameters.at("*");
+                std::cout << "requested file: " << path << std::endl;
 
                 // FIXME not all files are text
-                if (std::ifstream file(clean_path); file.is_open()) {
+                if (std::ifstream file(path); file.is_open()) {
                     std::string line;
                     while (getline(file, line))
                         response << line << "\n";
                 }
                 else {
-                    response << "could not open file: " << clean_path;
+                    response << "could not open file: " << path;
                     response.Status = 404;
                 }
         }
