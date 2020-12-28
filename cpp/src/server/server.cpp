@@ -54,7 +54,7 @@ void Server::handleRequests() {
     while (_run) {
         using namespace std;
         if (_queue.Empty()) {
-            this_thread::sleep_for(chrono::milliseconds(50)); // FIXME
+            this_thread::sleep_for(chrono::milliseconds(5)); // FIXME
             continue;
         }
 
