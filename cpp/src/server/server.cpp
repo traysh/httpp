@@ -3,7 +3,7 @@
 #include "connection/connection.hpp"
 #include "http/request.hpp"
 #include "http/response.hpp"
-#include "requesthandler.hpp"
+#include "http/requesthandler.hpp"
 #include "http/requestparser.hpp"
 
 #include <string.h>
@@ -62,8 +62,8 @@ void Server::handleRequests() {
 
         // FIXME use a thread pool
         auto result = std::async(std::launch::async, [&]() {
-            using HandlerState = RequestHandler::StateType;
-            RequestHandler handler(*connection, _router);
+            using HandlerState = HTTP::RequestHandler::StateType;
+            HTTP::RequestHandler handler(*connection, _router);
 
             for (auto age = handler.Age(); age <= chrono::seconds(3000); // FIXME
                 age = handler.Age()) {
@@ -78,7 +78,7 @@ void Server::handleRequests() {
                 }
             }
 
-            if (handler.State() == RequestHandler::StateType::Failed) {
+            if (handler.State() == HTTP::RequestHandler::StateType::Failed) {
                 handler.GenericError();
             }
             else if (handler.Step() != decltype(handler)::StepType::Finished) {

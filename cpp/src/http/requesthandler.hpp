@@ -7,10 +7,10 @@
 
 #include "http/request.hpp"
 #include "http/requestparser.hpp"
-#include "router.hpp"
+#include "server/router.hpp"
 #include "connection/streambuffer.hpp"
 
-namespace Server {
+namespace HTTP {
 class RequestHandler {
    public:
     enum class StepType {
@@ -27,7 +27,7 @@ class RequestHandler {
         Succeed,
     };
 
-    RequestHandler(Connection::Connection& connection, Router& router)
+    RequestHandler(Connection::Connection& connection, Server::Router& router)
         : _buffer(connection),
           _parser(_buffer),
           _router(router),
@@ -44,13 +44,13 @@ class RequestHandler {
     inline void GenericError() {
         _state = StateType::Failed;
         _response.Clear();
-        _response.Status = HTTP::ResponseStatus::Type::InternalServerError;
+        _response.Status = ResponseStatus::Type::InternalServerError;
     }
 
     inline void Timeout() {
         _state = StateType::Failed;
         _response.Clear();
-        _response.Status = HTTP::ResponseStatus::Type::RequestTimeOut;
+        _response.Status = ResponseStatus::Type::RequestTimeOut;
     }
 
     StateType Process() {
@@ -61,7 +61,7 @@ class RequestHandler {
         std::array<std::pair<StepType, _Processor>, 4> steps = {
             std::make_pair(StepType::Parse,
                            [&]() {
-                               using Result = typename HTTP::RequestParser::Result;
+                               using Result = typename RequestParser::Result;
 
                                auto result = _parser.Parse(_request);
                                if (result == Result::Failed) {
@@ -134,10 +134,10 @@ class RequestHandler {
     StepType _step = StepType::Parse;
     StateType _state = StateType::NotProcessed;
     Connection::StreamBuffer _buffer;
-    HTTP::RequestParser _parser;
-    Router& _router;
-    HTTP::Request _request;
-    HTTP::Response _response;
+    RequestParser _parser;
+    Server::Router& _router;
+    Request _request;
+    Response _response;
     std::chrono::system_clock::time_point _createdAt;
 };
 }
